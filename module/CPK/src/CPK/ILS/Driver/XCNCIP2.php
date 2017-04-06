@@ -834,6 +834,13 @@ class XCNCIP2 extends \VuFind\ILS\Driver\AbstractBase implements
                 return $this->handleStutuses($response);
             }
 
+            if ($this->agency === 'AAA001') {
+                $bibId = '0002' . sprintf('%011d', $bibId);
+                $request = $this->requests->LUISBibItem($bibId, $nextItemToken, $this, $patron);
+                $response = $this->sendRequest($request);
+                return $this->handleStutuses($response);
+            }
+
             if ($this->agency === 'ZLG001') {
                 $bibId = str_replace('oai:', '', $bibId);
                 $request = $this->requests->LUISBibItem($bibId, $nextItemToken, $this, $patron);
@@ -1312,6 +1319,12 @@ class XCNCIP2 extends \VuFind\ILS\Driver\AbstractBase implements
             } catch (ILSException $e) {
             }
 
+            if ($this->agency === 'AAA001') {
+                $dateDue = $this->useXPath($current, 'dateDue');
+                $dueStatus =$this->hasOverdue($dateDue);
+                $dateDue = $this->parseDate($dateDue);
+            }
+
             $retVal[] = array(
                 'cat_username' => $patron['cat_username'],
                 'duedate' => empty($dateDue) ? '' : $dateDue,
@@ -1574,6 +1587,10 @@ class XCNCIP2 extends \VuFind\ILS\Driver\AbstractBase implements
             if ($this->useXPath($recent, 'ElectronicAddressType')[0] == 'mailto') {
                 $email = $this->useXPath($recent, 'ElectronicAddressData');
             }
+        }
+        if ($this->agency === 'AAA001') {
+            $email = $this->useXPath($response,
+                    'LookupUserResponse/UserOptionalFields/UserAddressInformation/PhysicalAddress/ElectronicAddressData');
         }
         $group = $this->useXPath($response,
             'LookupUserResponse/UserOptionalFields/UserPrivilege/UserPrivilegeDescription');
