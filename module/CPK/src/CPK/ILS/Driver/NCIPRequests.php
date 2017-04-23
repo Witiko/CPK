@@ -110,6 +110,7 @@ class NCIPRequests {
     public function cancelRequestItemUsingItemId($patron, $itemId) {
         $requestType = "Estimate";
         if (in_array($this->agency, $this->libsLikeTabor)) $requestType = "Hold";
+        if ($this->agency == 'ABA001') $requestType = "Hold"; // NLK
         $body =
         "<ns1:CancelRequestItem>" .
         $this->insertInitiationHeader($patron) .
