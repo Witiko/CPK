@@ -12,34 +12,45 @@
 <div class="row">
   <div class="<?=$this->layoutClass('mainbody')?>">
     <h2><?=$this->transEsc('Settings') ?></h2>
-    <div class='well'>
-      <fieldset>
-        <legend><?=$this->translate('Citations style') ?></legend>
-        <select name='citation-style'>
-        <? foreach ($this->availableCitationStyles as $style): ?>
-        <option<?= ($this->selectedCitationStyle === $style['id']) ? ' selected="selected"' : '' ?> value='<?=$style['id']?>'><?=$style['description']?></option>
-        <? endforeach; ?>
-        </select>
-        <span class='citation-style-status'></span>
-      </fieldset>
-      <fieldset>
-        <legend><?=$this->translate('Records per page') ?></legend>
-        <select name='records-per-page'>
-        <? foreach ($this->recordsPerPageOptions as $option): ?>
-        <option<?= ($this->selectedRecordsPerPageOption == $option) ? ' selected="selected"' : '' ?> value='<?=$option?>'><?=$option?></option>
-        <? endforeach; ?>
-        </select>
-        <span class='records-per-page-status'></span>
-      </fieldset>
-      <fieldset>
-        <legend><?=$this->translate('Default sorting') ?></legend>
-        <select name='preferred-sorting'>
-        <? foreach ($this->sortingOptions as $key => $option): ?>
-        <option<?= ($this->selectedSorting == $key) ? ' selected="selected"' : '' ?> value='<?=$key?>'><?=$this->transEsc($option)?></option>
-        <? endforeach; ?>
-        </select>
-        <span class='preferred-sorting-status'></span>
-      </fieldset>
+    <div class='row well'>
+        <div class="col-md-4">
+          <fieldset>
+            <legend><?=$this->translate('Citations style') ?></legend>
+            <select name='citation-style' class="form-control">
+            <? foreach ($this->availableCitationStyles as $style): ?>
+            <option<?= ($this->selectedCitationStyle === $style['id']) ? ' selected="selected"' : '' ?> value='<?=$style['id']?>'><?=$style['description']?></option>
+            <? endforeach; ?>
+            </select>
+            <span class='citation-style-status'></span>
+          </fieldset>
+          <fieldset>
+            <legend><?=$this->translate('Records per page') ?></legend>
+            <select name='records-per-page' class="form-control">
+            <? foreach ($this->recordsPerPageOptions as $option): ?>
+            <option<?= ($this->selectedRecordsPerPageOption == $option) ? ' selected="selected"' : '' ?> value='<?=$option?>'><?=$option?></option>
+            <? endforeach; ?>
+            </select>
+            <span class='records-per-page-status'></span>
+          </fieldset>
+          <fieldset>
+            <legend><?=$this->translate('Default sorting') ?></legend>
+            <select name='preferred-sorting' class="form-control">
+            <? foreach ($this->sortingOptions as $key => $option): ?>
+            <option<?= ($this->selectedSorting == $key) ? ' selected="selected"' : '' ?> value='<?=$key?>'><?=$this->transEsc($option)?></option>
+            <? endforeach; ?>
+            </select>
+            <span class='preferred-sorting-status'></span>
+          </fieldset>
+        </div>
+        <div class="col-md-8">
+            <fieldset>
+                <legend><?=$this->translate('Preferred institutions') ?></legend>
+                <div>
+                    gg
+                </div>
+                <button class="btn btn-primary pull-right" id="set-preferred-institutions"><?=$this->translate("Save preferred institutions")?></button>
+            </fieldset>
+        </div>
     </div>
   </div>
 
@@ -47,3 +58,5 @@
     <?=$this->context($this)->renderInContext("myresearch/menu.phtml", array('active' => 'settings'))?>
   </div>
 </div>
+
+<?=$this->render("Recommend/SideFacets/saveTheseInstitutionsConfirmationModal.phtml")?>
