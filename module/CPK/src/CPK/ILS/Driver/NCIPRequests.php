@@ -110,7 +110,7 @@ class NCIPRequests {
     public function cancelRequestItemUsingItemId($patron, $itemId) {
         $requestType = "Estimate";
         if (in_array($this->agency, $this->libsLikeTabor)) $requestType = "Hold";
-        if ($this->agency == 'ABA001') $requestType = "Hold"; // NLK
+        if ($this->agency == 'ABA008') $requestType = "Hold"; // NLK
         $body =
         "<ns1:CancelRequestItem>" .
         $this->insertInitiationHeader($patron) .
@@ -124,14 +124,19 @@ class NCIPRequests {
 
     public function cancelRequestItemUsingRequestId($patron, $requestId) {
         $requestType = "Estimate";
+        $requestScopeType = "Bibliographic Item";
         if (in_array($this->agency, $this->libsLikeTabor)) $requestType = "Hold";
+        if ($this->agency == 'ABA008') { // NLK
+            $requestType = "Hold";
+            $requestScopeType = "Item";
+        }
         $body =
         "<ns1:CancelRequestItem>" .
         $this->insertInitiationHeader($patron) .
         $this->insertUserIdTag($patron) .
         $this->insertRequestIdTag($requestId, $patron) .
         $this->insertRequestType($requestType) .
-        $this->insertRequestScopeType("Bibliographic Item") .
+        $this->insertRequestScopeType($requestScopeType) .
         "</ns1:CancelRequestItem>";
         return $this->header() . $body . $this->footer();
     }

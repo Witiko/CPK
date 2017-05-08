@@ -419,6 +419,9 @@ class XCNCIP2 extends \VuFind\ILS\Driver\AbstractBase implements
             $holdDetails['item_id'] = substr($holdDetails['item_id'], strpos($holdDetails['item_id'], '.') + 1); // strip prefix
         }
         if ($holdDetails['item_id'] == 'N/A') $holdDetails['item_id'] = '';
+        if ($this->agency == 'ABA008') { // NLK
+            return empty($holdDetails['item_id']) ? $holdDetails['reqnum'] : $holdDetails['item_id'];
+        }
         return empty($holdDetails['reqnum']) ? $holdDetails['item_id'] : $holdDetails['reqnum'];
     }
 
@@ -1294,7 +1297,9 @@ class XCNCIP2 extends \VuFind\ILS\Driver\AbstractBase implements
             $dueStatus =$this->hasOverdue($dateDue);
             $dateDue = $this->parseDate($dateDue);
             $renewalNotPermitted = $this->useXPath($current, 'Ext/RenewalNotPermitted');
-            $renewable = empty($renewalNotPermitted)? true : false;
+            // NLK modification for NotRenewable
+            if (empty($renewalNotPermitted)) $renewalNotPermitted = $this->useXPath($current, 'Ext/NotRenewable');
+            $renewable = empty($renewalNotPermitted) ? true : false;
             $additRequest = $this->requests->lookupItem($item_id, $patron);
             try {
                 $additResponse = $this->sendRequest($additRequest);
