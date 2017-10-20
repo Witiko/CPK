@@ -85,10 +85,6 @@ function friendlyErrorType($type)
     return "";		
 }
 
-function friendlyExceptionType() {
-
-}
-
 /**
  * Dump and die
  * @param mixed $var
