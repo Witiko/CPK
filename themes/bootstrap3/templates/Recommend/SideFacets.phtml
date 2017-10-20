@@ -80,7 +80,7 @@ foreach ($queryParams as $key => $value) {
                     }
                     $dataFacet = $filter['field'].':"'.$filter['value'].'"';
                     ?>
-                    <a class="list-group-item applied-filter active <?=$filterClass?>" data-facet='<? if($filter['operator'] == 'OR'){echo "~";}?><?=htmlspecialchars($dataFacet)?>' href="<?=$removeLink?>">
+                    <a class="list-group-item applied-filter active <?if(isset($filterClass)) echo $filterClass?>" data-facet='<? if($filter['operator'] == 'OR'){echo "~";}?><?=htmlspecialchars($dataFacet)?>' href="<?=$removeLink?>">
                         <span class="pull-right flip"><i class="fa fa-times"></i></span>
                         <? if ($filter['operator'] == 'NOT') echo $this->transEsc('NOT') . ' '; if ($filter['operator'] == 'OR' && $i > 0) echo $this->transEsc('OR') . ' '; ?>
                         <? if ($field != 'unrecognized_facet_label'): ?>
@@ -103,9 +103,9 @@ foreach ($queryParams as $key => $value) {
     </div>
 <? endif;?>
 
-<div class="checkboxFilter<?if($shown == 0):?> hidden<? endif; ?>">
+<div class="checkboxFilter<?if(isset($shown) && $shown == 0):?> hidden<? endif; ?>">
     <div id="side-panel-eds-filters">
-        <?=$html?>
+        <?if(isset($html)) echo $html?>
     </div>
 </div>
 

@@ -85,6 +85,10 @@ function friendlyErrorType($type)
     return "";		
 }
 
+function friendlyExceptionType() {
+
+}
+
 /**
  * Dump and die
  * @param mixed $var
@@ -100,4 +104,92 @@ function dd($var) {
  */
 function d($var) {
     var_dump($var);
+}
+
+/**
+ * Redirect to custom error page for production and show error message for developers
+ *
+ * @param $logDetails
+ */
+function redirectErrorPage($logDetails) {
+    if (php_sapi_name() != 'cli' || defined('STDIN') || (is_numeric($_SERVER['argc']) && $_SERVER['argc'] > 0)) {
+        if (isset($_SERVER['VUFIND_ENV'])) {
+            if ($_SERVER['VUFIND_ENV'] == 'production') {
+
+                $host  = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+                $uri   = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+                $extra = 'error.php';
+                @header("Location: http://$host$uri/$extra");
+
+                include_once(__DIR__."/../themes/bootstrap3/templates/error/fatal-error-redirect.phtml");
+                exit;
+
+            } else if ($_SERVER['VUFIND_ENV'] == 'development') { // DEVELOPMENT
+                // continue with showing stacktrace
+                echo $logDetails;
+                exit();
+            } else {
+                exit('Variable VUFIND_ENV has strange value in Apache config! [Ignore this message when in CLI]');
+            }
+        } else {
+            exit('Variable VUFIND_ENV is not set in Apache config! [Ignore this message when in CLI]');
+        }
+    }
+}
+
+/**
+ * Write log file
+ *
+ * @param $err_severity Error code
+ * @param $err_msg Error message
+ * @param $err_file Error file
+ * @param $err_line Error line
+ * @param bool $isException If is exception - write "Exception" to log file, if not - write "Error"
+ */
+function writeLogFile($err_severity, $err_msg, $err_file, $err_line, $isException = false) {
+    $logDetails = date("Y-m-d H:i:s ");
+    if (!$isException){
+        $logDetails .= friendlyErrorType($err_severity)." \n";
+    }
+    $logDetails .= "$err_msg\n";
+    $logDetails .= $isException ? "Exception" : "Error";
+    $logDetails .= " on line $err_line in file $err_file\n\n";
+
+    $logFile = __DIR__."/../log/fatal-errors.log";
+    $fp = fopen($logFile, "a");
+    fwrite($fp, $logDetails);
+    fwrite($fp, "");
+    fclose($fp);
+
+    //Redirect to custom error page (for production)
+    redirectErrorPage($logDetails);
+}
+
+/**
+ * throw errors based on E_* error types
+ */
+function cpkErrorHandler($err_severity, $err_msg, $err_file, $err_line, array $err_context)
+{
+    // error was suppressed with the @-operator
+    if (0 === error_reporting()) { return false;}
+
+    if (!(error_reporting() & $err_severity)) {
+        return false;
+    }
+    //Write error notice to log file
+    writeLogFile($err_severity, $err_msg, $err_file, $err_line);
+    return false;
+}
+
+/**
+ * Own exception handler
+ *
+ * @param $exception Exception object
+ * @return bool
+ */
+function cpkExceptionHandler($e)
+{
+    //Write error notice to log file
+    writeLogFile($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine(), true);
+    return false;
 }
