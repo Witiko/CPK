@@ -403,6 +403,9 @@ JS;
             $appliedFacetFiltersAsString = join("|", $appliedFacetFilters);
             $compressedFacetFilters = specialUrlEncode(\LZCompressor\LZString::compressToBase64($appliedFacetFiltersAsString));
 
+            if (($title == "function_facet_str_mv") || ($title == "type_facet_str_mv") || ($title == "services_facet_str_mv") || ($title == "projects_facet_str_mv")){
+                $removedFacetFilterUrl = '?bool0%5B%5D=AND&type0%5B%5D=Libraries&lookfor0%5B%5D=&join=AND&searchTypeTemplate=basic&database=Solr';
+            }
             $removedFacetFilterUrl .= '&filter='.$compressedFacetFilters;
 
             ?>
