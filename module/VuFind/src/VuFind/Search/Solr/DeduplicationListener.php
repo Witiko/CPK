@@ -382,25 +382,26 @@ class DeduplicationListener
     protected function determineBuildingPriority($params)
     {
         $result = [];
-        if ($params->get('fq') == null) {
-            return $result;
-        }
-        foreach ($params->get('fq') as $fq) {
-            if (preg_match_all(
-                '/\bbuilding:"([^"]+)"/',
-                $fq,
-                $matches
-            )) {
-                $values = $matches[1];
-                foreach ($values as $value) {
-                    if (preg_match('/^\d+\/([^\/]+?)\//', $value, $matches)) {
-                        // Hierarchical facets; take only first level:
-                        $result[] = $matches[1];
-                    } else {
-                        $result[] = $value;
+        if ($params->get('fq') != null) {
+            foreach ($params->get('fq') as $fq) {
+                if (preg_match_all(
+                    '/\bbuilding:"([^"]+)"/',
+                    $fq,
+                    $matches
+                )) {
+                    $values = $matches[1];
+                    foreach ($values as $value) {
+                        if (preg_match('/^\d+\/([^\/]+?)\//', $value, $matches)) {
+                            // Hierarchical facets; take only first level:
+                            $result[] = $matches[1];
+                        } else {
+                            $result[] = $value;
+                        }
                     }
                 }
             }
+        } else {
+            return $result;
         }
 
         array_unshift($result, '');
@@ -440,36 +441,37 @@ class DeduplicationListener
         }
         $institutionMappings = array_flip($facetConfig->InstitutionsMappings->toArray());
         $result = [];
-        if ($params->get('fq') == null) {
-            return $result;
-        }
-        foreach ($params->get('fq') as $fq) {
-            if (preg_match(self::OR_FACETS_REGEX, $fq, $matches)) {
-                $field = $matches[2];
-                if ($field != 'institution') {
-                    continue;
-                }
-                $filters = explode('OR', $matches[3]);
-                foreach ($filters as $filter) {
-                    if (preg_match(self::FILTER_REGEX, $filter, $matches)) {
-                        $value = $matches[2];
-                        $prefix = $institutionMappings[$value];
-                        if ($prefix) {
+        if ($params->get('fq') != null) {
+            foreach ($params->get('fq') as $fq) {
+                if (preg_match(self::OR_FACETS_REGEX, $fq, $matches)) {
+                    $field = $matches[2];
+                    if ($field != 'institution') {
+                        continue;
+                    }
+                    $filters = explode('OR', $matches[3]);
+                    foreach ($filters as $filter) {
+                        if (preg_match(self::FILTER_REGEX, $filter, $matches)) {
+                            $value = $matches[2];
+                            $prefix = $institutionMappings[$value];
+                            if ($prefix) {
                                 $result[] = $prefix;
+                            }
                         }
                     }
-                }
-            } else if (preg_match(self::FILTER_REGEX, $fq, $matches)) {
-                $field = $matches[1];
-                if ($field != 'institution') {
-                    continue;
-                }
-                $value = $matches[2];
-                $prefix = $institutionMappings[$value];
-                if ($prefix) {
-                    $result[] = $prefix;
+                } else if (preg_match(self::FILTER_REGEX, $fq, $matches)) {
+                    $field = $matches[1];
+                    if ($field != 'institution') {
+                        continue;
+                    }
+                    $value = $matches[2];
+                    $prefix = $institutionMappings[$value];
+                    if ($prefix) {
+                        $result[] = $prefix;
+                    }
                 }
             }
+        } else {
+            return $result;
         }
         $result = array_flip($result);
         return $result;
