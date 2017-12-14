@@ -28,5 +28,6 @@
 
 // Load the Zend framework -- this will automatically trigger the appropriate
 // controller action based on directory and file names
+require_once "createTheme.php";
 define('CLI_DIR', __DIR__);     // save directory name of current script
 require_once __DIR__ . '/../public/index.php';
