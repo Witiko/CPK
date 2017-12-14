@@ -20,12 +20,32 @@ obalky.queryPart = obalky.href || function(bibinfo) {
   return queryPart;
 }
 
+/**
+ * Create file name to download from ObakyKnih
+ */
+obalky.getObalkyDocumentName = obalky.getObalkyDocumentName || function (bibinfo) {
+  var namePart = "";
+  var sep = "";
+  $.each(bibinfo, function (name, value) {
+    namePart += sep + name + "-" + value;
+    sep = "_";
+  });
+
+  var documentName = $(".record-title strong").html();
+  resultName = (documentName !== 'undefind') ? documentName.normalize('NFD').replace(/[\u0300-\u036f]/g, "")
+	   										 : namePart;
+  //replace all bad characters for filename
+  return resultName.replace(/[|&;^=$:%@"<>()`\/+,.{}\]]/g, "").split(' ').join('_');
+}
+
 obalky.coverTargetUrl = obalky.coverTargetUrl || function (bibinfo) {
   return obalky.linkUrl + "?" + obalky.queryPart(bibinfo);
 }
 
 obalky.pdfTargetUrl = obalky.pdfTargetUrl || function (bibinfo) {
-  return obalky.pdfUrl + "?" + obalky.queryPart(bibinfo);
+  var documentName = "_" + obalky.getObalkyDocumentName(bibinfo);
+  return documentName ? (obalky.pdfUrl + documentName.normalize('NFD').replace(/[\u0300-\u036f]/g, "") + "?" + obalky.queryPart(bibinfo))
+	  				  :  obalky.pdfUrl + obalky.queryPart(bibinfo);
 }
 
 obalky.imageIsLoaded = obalky.imageIsLoaded || function (image) {
