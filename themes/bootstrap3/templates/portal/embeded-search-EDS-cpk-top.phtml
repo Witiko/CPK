@@ -53,11 +53,12 @@
     </div>
 </div>
 
-<form class="navbar-left flip text-center" method="get" action="https://knihovny.cz/Search/Results" target="_top">
+<form class="navbar-left flip text-center" method="get" action="https://knihovny.cz/Search/Results/?database=EDS" target="_top">
     <input class="form-control lookfor" type="text" name="lookfor0[]" value=""
            placeholder="Zadejte hledaný dotaz, např. název knihy">
 
     <input type="hidden" name="searchTypeTemplate" value="basic">
+    <input type="hidden" name="database" value="EDS">
     <input type="hidden" name="type0[]" value="AllFields">
     <input type="hidden" name="join" value="AND">
     <input type="hidden" name="bool0[]" value="AND">

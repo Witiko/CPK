@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -20,7 +20,7 @@
             border-right: 0px;
             padding-left: 20px;
             display: inline;
-            max-width: 80% !important;
+            max-width: 60% !important;
             border: 2px solid #ccc;
 
         }
@@ -41,31 +41,38 @@
         .find-button:hover {
             background-color: #b71b4b;
         }
+
+        .logo-left {
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
-<div class='row'>
-    <div class='col-sm-12 text-center'>
-        <a href="https://knihovny.cz" title="Knihovny.cz"></a>
-        <img src='https://knihovny.cz/themes/bootstrap3/images/portalLogos/logo_knihovny.cz.png' alt='Knihovny.cz'
-             height='47'>
-        </a>
-    </div>
-</div>
 
 <form class="navbar-left flip text-center" method="get" action="https://knihovny.cz/Search/Results" target="_top">
-    <input class="form-control lookfor" type="text" name="lookfor0[]" value=""
-           placeholder="Zadejte hledaný dotaz, např. název knihy">
+    <div class='row'>
+        <div class='col-sm-12 text-center'>
+            <a href="https://knihovny.cz" title="Knihovny.cz"></a>
+            <img src='https://knihovny.cz/themes/bootstrap3/images/portalLogos/logo_knihovny.cz.png' alt='Knihovny.cz'
+                 height='47' class='logo-left'>
+            </a>
+            <input class="form-control lookfor" type="text" name="lookfor0[]" value=""
+                   placeholder="Enter the search query, eg. book title">
 
-    <input type="hidden" name="searchTypeTemplate" value="basic">
-    <input type="hidden" name="type0[]" value="AllFields">
-    <input type="hidden" name="join" value="AND">
-    <input type="hidden" name="bool0[]" value="AND">
-    <input type="hidden" name="page" value="1">
-    <input type="hidden" name="keepEnabledFilters" value="true">
+            <input type="hidden" name="searchTypeTemplate" value="basic">
+            <input type="hidden" name="database" value="EDS">
+            <input type="hidden" name="type0[]" value="AllFields">
+            <input type="hidden" name="join" value="AND">
+            <input type="hidden" name="bool0[]" value="AND">
+            <input type="hidden" name="page" value="1">
+            <input type="hidden" name="keepEnabledFilters" value="true">
 
-    <input class="form-control btn btn-primary find-button" type="submit" value="Hledat ">
+            <input class="form-control btn btn-primary find-button" type="submit" value="Find ">
+
+        </div>
+    </div>
 </form>
+
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </body>
 </html>

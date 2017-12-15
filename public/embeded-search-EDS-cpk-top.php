@@ -1,5 +1,5 @@
 <?php
-    include_once(__DIR__."/../themes/bootstrap3/templates/portal/embeded-search-cpk-left-en.phtml");
+    include_once(__DIR__."/../themes/bootstrap3/templates/portal/embeded-search-EDS-cpk-top.phtml");
     exit();
 ?>
 
@@ -31,9 +31,9 @@
 		scrolling="no"
 		marginheight="0"
 		marginwidth="0"
-		width="700"
+		width="400"
         height="100"
-        src="https://knihovny.cz/embeded-search-cpk-left-en.php">
+        src="https://knihovny.cz/embeded-search-EDS-cpk-top.php">
     </iframe>
   </body>
 </html>
