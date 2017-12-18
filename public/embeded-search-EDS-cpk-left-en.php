@@ -1,5 +1,5 @@
 <?php
-    include_once(__DIR__."/../themes/bootstrap3/templates/portal/embeded-EDS-search-cpk-left-en.phtml");
+    include_once(__DIR__."/../themes/bootstrap3/templates/portal/embeded-search-EDS-cpk-left-en.phtml");
     exit();
 ?>
 
