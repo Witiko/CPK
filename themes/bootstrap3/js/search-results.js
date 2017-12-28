@@ -728,7 +728,7 @@ jQuery( document ).ready( function( $ ) {
          * @param    {Object}    data    Object with lookFor, bool, etc.
          * @return    {undefined}
          */
-        updateUrl: function (data) {
+        updateUrl: function (data) {return;
 	    if (window.location.href.indexOf('/EDS/') != -1){
 		data['database'] = 'EDS';
 		$("#set-database li a[data-value='EDS']").parent().addClass("active");
@@ -736,11 +736,8 @@ jQuery( document ).ready( function( $ ) {
 	    }
             var stateObject = data;
             var title = 'New search query';
-            var url = '/Search/Results/?' + jQuery.param(data)
-            window.history.pushState(stateObject, title, url);
-            //console.log( 'Pushing and replacing state: ' );
-            //console.log( stateObject );
-            window.history.replaceState(stateObject, title, url);
+            var url = '/Search/Results/?' + jQuery.param(data);
+            try { window.history.replaceState( stateObject, title, url ); } catch ( e ) {}
         },
 
         /**
@@ -752,10 +749,8 @@ jQuery( document ).ready( function( $ ) {
         replaceUrl: function (data) {
             var stateObject = data;
             var title = 'New search query';
-            var url = '/Search/Results/?' + jQuery.param(data)
-            window.history.replaceState(stateObject, title, url);
-            ////console.log( 'Replacing state: ' );
-            ////console.log( stateObject );
+            var url = '/Search/Results/?' + jQuery.param(data);
+            try { window.history.replaceState( stateObject, title, url ); } catch ( e ) {}
         },
 
         /**
