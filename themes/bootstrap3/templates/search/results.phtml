@@ -324,15 +324,7 @@ $this->headScript()->appendFile("markerclusterer.js");
 <? if(isset($_GET['type0'][0]) && $_GET['type0'][0] == 'Libraries'): ?>
     <script>
         jQuery( document ).ready( function( $ ) {
-            console.log( "Rendering map" );
-            console.log("Query: <?=$this->query?>");
-            console.log("Filter: <?=$_GET['filter']?>");
-            console.log( 'Get Map from results.phtml' );
             getData("<?=$this->query?>", "<?=$_GET['filter']?>");
         });
     </script>
 <? endif; ?>
-
-<Script>
-    console.log('results.phtml fired');
-</Script>
