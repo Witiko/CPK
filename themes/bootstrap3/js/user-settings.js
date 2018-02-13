@@ -103,4 +103,6 @@ jQuery( document ).ready( function( $ ) {
 		});
 
 	});
+
+    $( '#institutions, #records-per-page, #citation-style, #preferred-sorting' ).select2();
 });

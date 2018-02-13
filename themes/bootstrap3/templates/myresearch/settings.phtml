@@ -1,12 +1,15 @@
 <?
     // Set up page title:
     $this->headTitle($this->translate('Settings'));
+    $this->headLink()->appendStylesheet('//cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css');
 
     // Set up breadcrumbs:
     $this->layout()->breadcrumbs = '<li><a title="' . $this->transEsc('Main page') . '" href="/Search">' . $this->transEsc('Main page') . '</a></li> '.
     '<li><a href="' . $this->url('myresearch-home') . '">' . $this->transEsc('Your Account') . '</a></li> <li class="active">' . $this->transEsc('Settings') . '</li>';
 
     $this->headScript()->appendFile("user-settings.js");
+    $this->headScript()->appendFile("//cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js");
+
 ?>
 <!--<ul class="breadcrumb hidden-print"><?=$this->layout()->breadcrumbs ?></ul>-->
 <div class="row">
@@ -16,7 +19,7 @@
         <div class="col-md-4">
           <fieldset>
             <legend><?=$this->translate('Citations style') ?></legend>
-            <select name='citation-style' class="form-control">
+            <select name='citation-style' id="citation-style" class="form-control">
             <? foreach ($this->availableCitationStyles as $style): ?>
             <option<?= ($this->selectedCitationStyle === $style['id']) ? ' selected="selected"' : '' ?> value='<?=$style['id']?>'><?=$style['description']?></option>
             <? endforeach; ?>
@@ -25,7 +28,7 @@
           </fieldset>
           <fieldset>
             <legend><?=$this->translate('Records per page') ?></legend>
-            <select name='records-per-page' class="form-control">
+            <select name='records-per-page' id="records-per-page" class="form-control">
             <? foreach ($this->recordsPerPageOptions as $option): ?>
             <option<?= ($this->selectedRecordsPerPageOption == $option) ? ' selected="selected"' : '' ?> value='<?=$option?>'><?=$option?></option>
             <? endforeach; ?>
@@ -34,7 +37,7 @@
           </fieldset>
           <fieldset>
             <legend><?=$this->translate('Default sorting') ?></legend>
-            <select name='preferred-sorting' class="form-control">
+            <select name='preferred-sorting' id="preferred-sorting" class="form-control">
             <? foreach ($this->sortingOptions as $key => $option): ?>
             <option<?= ($this->selectedSorting == $key) ? ' selected="selected"' : '' ?> value='<?=$key?>'><?=$this->transEsc($option)?></option>
             <? endforeach; ?>
@@ -45,10 +48,29 @@
         <div class="col-md-8">
             <fieldset>
                 <legend><?=$this->translate('Preferred institutions') ?></legend>
-                <div>
-                    gg
+                <div class="row">
+                    <form action="/MyResearch/userSaveInstitution">
+                        <span>
+                            <select id="institutions" name="institution">
+                                <?php foreach($institutions as $institution): ?>
+                                    <?= sprintf("<option value='%s'>%s</option>", $institution['value'], $this->translate($institution['value'])); ?>
+                                <?php endforeach; ?>
+                            </select>
+                        </span>
+                        <button class="btn btn-primary pull-right btn-sm" id="set-preferred-institutions"><?=$this->translate("Add")?></button>
+                    </form>
                 </div>
-                <button class="btn btn-primary pull-right" id="set-preferred-institutions"><?=$this->translate("Save preferred institutions")?></button>
+                <div class="row">
+                    <table class="table table-striped table-responsive table-condensed">
+                        <tbody>
+                            <?php if (! empty($preferredInstitutions)): ?>
+                                <?php foreach($preferredInstitutions as $institution): ?>
+                                    <?= sprintf("<tr><td>%s</td><td><a href='/MyResearch/userRemoveSavedInstitution?institution=%s' title='Remove' class='pr-interface-crosscancel3 pull-right' style='padding-top: 3px; padding-right: 6px; color: red; cursor: pointer;'></a></td></tr>", $this->translate($institution), $institution); ?>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </fieldset>
         </div>
     </div>

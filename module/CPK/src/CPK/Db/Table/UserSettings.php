@@ -287,6 +287,10 @@ class UserSettings extends Gateway
      */
     public function saveTheseInstitutions(\CPK\Db\Row\User $user, array $institutions = [])
     {
+        if (empty($institutions)) {
+            return;
+        }
+
         $data = "";
         foreach($institutions as $institution) {
             $data .= $institution.';';
@@ -342,5 +346,51 @@ class UserSettings extends Gateway
 
         $result = $this->executeAnyZendSQLSelect($select)->current();
         return $result['saved_institutions'];
+    }
+
+    /**
+     * Remove saved institutions
+     *
+     * @param VuFind\Db\Row\User $user
+     * @param string $institutionToRemove
+     *
+     * @return string
+     */
+    public function removeSavedInstitution(\CPK\Db\Row\User $user, $institutionToRemove)
+    {
+        $institutions = explode(";", $this->getSavedInstitutions($user));
+
+        if (count($institutions)) {
+            foreach ($institutions as $key => $institution) {
+                if ($institution == $institutionToRemove) {
+                    unset($institutions[$key]);
+                }
+            }
+
+            $this->saveTheseInstitutions($user, $institutions);
+        }
+    }
+
+    /**
+     * Save institution
+     *
+     * @param VuFind\Db\Row\User $user
+     * @param string $institutionToSave
+     *
+     * @return void
+     */
+    public function saveInstitution(\CPK\Db\Row\User $user, $institutionToSave)
+    {
+        $savedInstitutions = $this->getSavedInstitutions($user);
+
+        if (! empty($savedInstitutions)) {
+            $institutions = explode(";", $this->getSavedInstitutions($user));
+        } else {
+            $institutions = [];
+        }
+
+        $institutions[] = $institutionToSave;
+
+        $this->saveTheseInstitutions($user, $institutions);
     }
 }
