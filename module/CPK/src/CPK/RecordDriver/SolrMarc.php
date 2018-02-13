@@ -29,7 +29,7 @@ class SolrMarc extends ParentSolrMarc
      */
     protected $forbiddenSnippetFields = [
         'author', 'author-letter', 'title', 'title_short', 'title_full',
-        'title_full_unstemmed', 'title_auth', 'title_sub', 'spelling', 'id',
+        'title_auth', 'title_sub', 'spelling', 'id',
         'ctrlnum', 'title_autocomplete', 'author_autocomplete',
         'titleSeries_search_txt_mv', 'authorCorporation_search_txt_mv',
         'author_display', 'title_display', 'author_facet_str_mv', 'author-letter',
@@ -47,6 +47,58 @@ class SolrMarc extends ParentSolrMarc
             $this->ilsConfig = $this->ils->getDriverConfig();
 
         return $this->ilsConfig;
+    }
+
+    /**
+     * Get an annotation
+     *
+     * @return string
+     */
+    public function getAnnotation() {
+        $annotation = $this->getFieldArray('520', array('a'));
+        return !empty($annotation) ? $annotation[0] : false;
+    }
+
+    /**
+     * Get patent info for export in txt
+     */
+    public function getPatentInfo() {
+        $patentInfo = [];
+        $patentInfo['country'] = $this->getFieldArray('013', array('b'))[0];
+        $patentInfo['type'] = $this->getFieldArray('013', array('c'))[0];
+        $patentInfo['id'] = $this->getFieldArray('013', array('a'))[0];
+        $patentInfo['publish_date'] = $this->getFieldArray('013', array('d'))[0];
+
+        if(empty($patentInfo)) {
+            return false;
+        }
+
+        $patentInfoText = $this->renderPatentInfo($patentInfo);
+
+        return $patentInfoText;
+    }
+
+    /**
+     * Render patent info to export file
+     *
+     * @param $patentInfo array with patent info
+     * @return string rendered string
+     */
+    public function renderPatentInfo($patentInfo) {
+        $patentInfoText = '';
+        $patentInfoText .= $this->translate('Patent') . ': ' . $patentInfo['country'] . ', ';
+        switch ($patentInfo['type']) {
+            case 'B6':
+                $patentInfoText .= $this->translate('patent_file'); break;
+            case 'A3':
+                $patentInfoText .= $this->translate('app_invention'); break;
+            case 'U1':
+                $patentInfoText .= $this->translate('utility_model'); break;
+            default:
+                $patentInfoText .= $this->translate('unknown_patent_type'); break;
+        }
+        $patentInfoText .= ', ' . $patentInfo['id'] . ', ' . $patentInfo['publish_date'] . "\r\n";
+        return $patentInfoText;
     }
 
     public function getLocalId()
@@ -569,7 +621,10 @@ class SolrMarc extends ParentSolrMarc
      */
     public function getIsn()
     {
-    	return isset($this->fields['issnIsbnIsmn_search_str_mv'][0]) ? $this->fields['issnIsbnIsmn_search_str_mv'][0] : false;
+        foreach (array('isbn', 'issn', 'ismn_int_mv') as $field) {
+            if (isset($this->fields[$field][0])) return $this->fields[$field][0];
+        }
+        return false;
     }
 
 	public function getBibinfoForObalkyKnih()
@@ -782,7 +837,7 @@ class SolrMarc extends ParentSolrMarc
 
 	public function getEAN()
     {
-        return (!empty($this->fields['ean_str_mv']) ? $this->fields['ean_str_mv'][0] : null);
+        return (!empty($this->fields['ean_isn_mv']) ? $this->fields['ean_isn_mv'][0] : null);
     }
 
 	protected function getCNB()

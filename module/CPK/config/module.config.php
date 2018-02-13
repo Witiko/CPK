@@ -36,6 +36,8 @@ $config = array(
                     'solrlocal' => 'CPK\RecordDriver\Factory::getSolrMarcLocal',
                     'solrdublincore' => 'CPK\RecordDriver\Factory::getSolrDublinCore',
                     'solrauthority' => 'CPK\RecordDriver\Factory::getSolrAuthority',
+                    'solrlibrary' => 'CPK\RecordDriver\Factory::getSolrLibrary',
+                    'solrdictionary' => 'CPK\RecordDriver\Factory::getSolrDictionary',
                 ) /* factories */
             ), /* recorddriver */
             'recordtab' => array(
@@ -44,9 +46,14 @@ $config = array(
                     'userCommentsObalkyKnih' => 'CPK\RecordTab\UserCommentsObalkyKnih',
                     'eVersion' => 'CPK\RecordTab\EVersion',
                     'buy' => 'CPK\RecordTab\Buy',
+                    'edsavailability' => 'CPK\RecordTab\EdsAvailability',
                     'StaffViewDublinCore' => 'CPK\RecordTab\StaffViewDublinCore',
 					'holdingsils'     => 'CPK\RecordTab\HoldingsILS',
-                    'tagsandcomments' => 'CPK\RecordTab\TagsAndComments'
+                    'tagsandcomments' => 'CPK\RecordTab\TagsAndComments',
+                    'branches' => 'CPK\RecordTab\Branches',
+                    'services' => 'CPK\RecordTab\Services',
+                    'addInfo' => 'CPK\RecordTab\AddInfo',
+                    'contacts' => 'CPK\RecordTab\Contacts',
                 ), /* invokables */
             ), /* recordtab */
             'recommend' => [
@@ -151,8 +158,40 @@ $config = array(
                     'DedupedRecords' => 'DedupedRecords'
                 ],
                 'defaultTab' => 'EVersion'
-            ]
-        ]
+            ],
+            'CPK\RecordDriver\SolrDictionary' => [
+                'tabs' => [
+                    'EVersion' => 'EVersion',
+                    'UserCommentsObalkyKnih' => 'UserCommentsObalkyKnih',
+                    'Reviews' => 'Reviews',
+                    'Details' => 'StaffViewMARC',
+                    'DedupedRecords' => 'DedupedRecords'
+                ],
+                'defaultTab' => 'EVersion'
+            ],
+            'VuFind\RecordDriver\EDS' => [
+                'tabs' => [
+                    //'Description' => 'Description',
+                    'TOC' => 'TOC',
+                    'Reviews' => 'Reviews', 'Excerpt' => 'Excerpt',
+                    'Preview' => 'preview',
+                    'EdsAvailability' => 'EdsAvailability',
+                    'Details' => 'StaffViewArray',
+                ],
+                'defaultTab' => null
+            ],
+            'CPK\RecordDriver\SolrLibrary' => [
+                'tabs' => [
+                    'AddInfo' => 'AddInfo',
+                    'Contacts' => 'Contacts',
+                    'Services' => 'Services',
+                    'Branches' => 'Branches',
+                    'Details' => 'StaffViewMARC',
+                    'DedupedRecords' => 'DedupedRecords'
+                ],
+                'defaultTab' => 'AddInfo'
+            ],
+        ],
     ), /* vufind */
     'controllers' => array(
         'factories' => array(
@@ -167,7 +206,8 @@ $config = array(
             'search' => 'CPK\Controller\SearchController',
             'ajax' => 'CPK\Controller\AjaxController',
             'status' => 'CPK\Controller\StatusController',
-            'admin' => 'CPK\Controller\AdminController'
+            'admin' => 'CPK\Controller\AdminController',
+            'edsrecord' => 'CPK\Controller\EdsrecordController',
         ), /* invokables */
     ), /* controllers */
     'controller_plugins' => [

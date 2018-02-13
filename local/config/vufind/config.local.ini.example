@@ -77,8 +77,8 @@ getAssertion    = 1
 database        = mysql://user:pw@localhost/dbName
 
 [Logging]
-file            = /home/vufind/git/VuFind/messages-front.log:alert,error
-;file            = /home/vufind/git/VuFind/messages-front.log:alert,error,notice,debug
+file            = /home/vufind/git/VuFind/fatal-errors.log:alert,error
+;file            = /home/vufind/git/VuFind/fatal-errors.log:alert,error,notice,debug
 
 [ExternalLinks]
 BOA001		= "https://vufind.mzk.cz/Record/"
@@ -116,6 +116,9 @@ item_reservation_url    = ""
 item_prolongation_url   = ""
 user_registration_url   = ""
 user_prolongation_url   = ""
+
+[GoogleMaps]
+apikey = AIzaSyALBfl5KwpSRjsvl4h0gzZB1fdq4Ei6DW0
 
 ;This configuration sets recipients for feedback page. Split values with comma
 ;E.g. "mail@server.cz,mail2@server.cz"

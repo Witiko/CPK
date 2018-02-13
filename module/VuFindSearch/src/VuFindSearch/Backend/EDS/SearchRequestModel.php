@@ -145,7 +145,7 @@ class SearchRequestModel
     protected function formatDateLimiter($filter)
     {
         // PublicationDate:[xxxx TO xxxx]
-        $dates = substr($filter, 17);
+        $dates = substr($filter, strpos($filter, ':') + 2);
         $dates = substr($dates, 0, strlen($dates) - 1);
         $parts = explode(' TO ', $dates, 2);
         if (count($parts) == 2) {
@@ -175,13 +175,16 @@ class SearchRequestModel
             case 'filters':
                 $cnt = 1;
                 foreach ($values as $filter) {
-                    if (substr($filter, 0, 6) == 'LIMIT|') {
-                        $this->addLimiter(substr($filter, 6));
+                    if (substr($filter, 0, 6) == 'LIMIT!') {
+                        $limiter = str_replace('\:', ':', substr($filter, 6));
+                        $this->addLimiter($limiter);
                     } else if (substr($filter, 0, 7) == 'EXPAND:') {
                         $this->addExpander(substr($filter, 7));
                     } else if (substr($filter, 0, 11) == 'SEARCHMODE:') {
                         $this->searchMode = substr($filter, 11, null);
                     } else if (substr($filter, 0, 15) == 'PublicationDate') {
+                        $this->addLimiter($this->formatDateLimiter($filter));
+                    } else if (substr($filter, 0, 11) == 'publishDate') {
                         $this->addLimiter($this->formatDateLimiter($filter));
                     } else {
                         $this->addFilter("$cnt,$filter");
@@ -379,7 +382,7 @@ class SearchRequestModel
     {
         return addcslashes($value, ":,");
     }
-    
+
      /**
      * Escape characters that may be present in the action parameter syntax
      *

@@ -99,7 +99,9 @@ class EdsController extends AbstractSearch
      */
     public function searchAction()
     {
-        return $this->resultsAction();
+        $params = $this->params()->fromQuery();
+        $params['database'] = 'EDS';
+        return $this->redirect()->toRoute('search-results', array(), array('query' => $params));
     }
 
     /**
@@ -162,7 +164,7 @@ class EdsController extends AbstractSearch
                     // facet has been applied to the search, we should store it as
                     // the selected facet for the current control.
                     if ($searchObject) {
-                        $limitFilt = 'LIMIT|' . $fullFilter;
+                        $limitFilt = 'LIMIT:' . $fullFilter;
                         if ($searchObject->getParams()->hasFilter($limitFilt)) {
                             $facetList[$facet]['LimiterValues'][$key]['selected']
                                 = true;

@@ -15,7 +15,8 @@
               $similarRecordUrl = $this->recordLink()->getUrl($similarRecordDriver)."?referer=".$this->referer;
             ?>
         	<div class="row list-group-item clearfix">
-              <div class="col-md-3 ">
+              <? if(! ($this->driver instanceof CPK\RecordDriver\SolrLibrary)): ?>
+              <div class="col-xs-12 col-sm-12 col-md-12 col-lg-3 similar-item">
     			<? $recordId =  preg_replace("/\./", "", $recordId)?>
                     <? $recordId =  preg_replace("/:/", "", $recordId)?>
               		<a href='<?=$this->recordLink()->getUrl($similarRecordDriver)?><?="?referer=".$this->referer?>' title='<?=$this->escapeHtml($similarRecordDriver->getTitle())?> (<?=$this->translate($format)?>)' class="coverThumbnail cover_<?=$recordId?>" tabindex='-1'>
@@ -35,12 +36,19 @@
 
                     </a>
               </div>
-              <div class="col-md-9 content">
+              <? endif; ?>
+              <div class="col-xs-12 col-sm-12 col-md-12 col-lg-9 similar-item content">
                 <h5 class="list-group-item-heading">
                   <a href='<?=$similarRecordUrl?>'
                     	title='<?=$this->escapeHtml($similarRecordDriver->getTitle())?> (<?=$this->translate($format)?>)'>
                     <strong><?=$this->escapeHtml($similarRecordDriver->getTitle())?></strong>
                   </a>
+                  <? if ($similarRecordDriver instanceof CPK\RecordDriver\SolrLibrary): ?>
+                  <a href='<?=$similarRecordUrl?>'
+                     title='<?=$this->escapeHtml($similarRecordDriver->getLibraryNames())?> (<?=$this->escapeHtml($similarRecordDriver->getSigla())?>)'>
+                      <strong><?=$this->escapeHtml($similarRecordDriver->getLibraryNames())?></strong>
+                  </a>
+                  <? endif; ?>
                 </h5>
                 <p class="list-group-item-text">
                   <!--
@@ -50,6 +58,11 @@
                   -->
                   <? $author = $similarRecordDriver->getPrimaryAuthor(); if (!empty($author)): ?>
                     <?=$this->escapeHtml($author)?>
+                  <? endif; ?>
+                  <? if ($similarRecordDriver instanceof CPK\RecordDriver\SolrLibrary): ?>
+                  <? $addresses = $similarRecordDriver->getLibraryAddress(); if (!empty($addresses)): ?>
+                      <? foreach ($addresses as $address): ?><?= $this->escapeHtml($address)?><br/><? endforeach; ?>
+                  <? endif; ?>
                   <? endif; ?>
                 </p>
               </div>

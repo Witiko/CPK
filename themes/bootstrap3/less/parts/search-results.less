@@ -3,6 +3,10 @@
 */
 @import url("//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css");
 
+.search-result-list {
+  margin-top: 10px;
+}
+
 .authorbox{
   margin-top: -20px;
 }
@@ -110,9 +114,20 @@
 }
 
 .author-info {
-    font-weight: bold; font-size: 120%;
+    font-weight: bold;
     color: #444;
     font-size: 120%;
+}
+
+.eds-author-info {
+  margin-bottom: 10px;
+  display: block;
+}
+
+.eds-author-info a {
+  font-weight: bold;
+  color: #444 !important;
+  font-size: 110%;
 }
 
 .author-icon {
@@ -157,6 +172,7 @@
 .records-in-libraries-title {
     font-weight: bold;
     margin-left: 4px;
+    font-color: #444;
 }
 
 .scrollable-menu {
@@ -164,11 +180,45 @@
   max-height: 200px;
   //width: 300px;
   overflow-x: hidden;
+  overflow-y: scroll;
   padding: 6px;
   @media (min-width: @screen-sm) {
     left: auto;
     right: 0px;
   }
+  //@media (max-width: @screen-sm) {
+  //  .box-shadow(inset 0px -24px 50px -41px rgba(8,8,8,1));
+  //}
+}
+
+.dropdown-menu.scrollable-menu {
+  @media (max-width: @screen-xs) {
+    position: relative;
+  }
+}
+
+.scrollable-menu::-webkit-scrollbar {
+  -moz-appearance: none !important;
+  -webkit-appearance: none !important;
+  width: 10px !important;
+}
+
+.scrollable-menu::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3) !important;
+  -webkit-border-radius: 10px !important;
+  border-radius: 10px !important;
+}
+
+.scrollable-menu::-webkit-scrollbar-thumb {
+  -webkit-border-radius: 10px !important;
+  border-radius: 10px !important;
+  background: #9f9f9f !important;
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5) !important;
+
+}
+
+.scrollable-menu::-webkit-scrollbar-thumb:window-inactive {
+  background: #9f9f9f !important;
 }
 
 .scrollable-menu li {
@@ -266,11 +316,49 @@
     content: "\ead9";
 }
 
+.search-results-favorite-button {
+  width: auto;
+}
+
 .search-results-favorite-button .list-group-item {
     padding: 0px;
     border: none;
 }
 
+.search-results-favorite-button .list-group-item a span b {
+  font-size: 13px;
+}
+
 .result-list-toolbar a:hover {
     text-decoration: underline;
+}
+
+#eds-links td {
+  padding: 4px;
+}
+
+.library-result {
+  padding-left: 14px;
+}
+
+.eds-tabs li{
+  margin-bottom: -2px;
+}
+
+.eds-results-questionmarkhelp {
+  right: 0;
+  bottom: 0;
+  position: absolute;
+  margin-bottom: 10px;
+  width: auto;
+  display: table-cell;
+}
+
+@media only screen and (max-width: 1199px) {
+  .pagination-numbers {
+    display: none;
+  }
+  .facets-questionmark-help {
+    text-align: center;
+  }
 }

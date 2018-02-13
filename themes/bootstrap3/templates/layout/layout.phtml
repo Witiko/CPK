@@ -8,9 +8,11 @@
     <?=$this->headMeta()?>
     <meta property="og:url"                content="https://knihovny.cz/" />
     <meta property="og:title"              content="Knihovny.cz" />
-    <meta property="og:description"  content="Knihovny pod jednou střechou. Využijte komfort a jednoduchost prohledávání fondů desítek českých knihoven současně. Využijte služeb knihoven, objednávejte, stahujte - kdykoliv a kdekoliv." />
-    <meta property="og:image"              content="https://knihovny.cz/themes/bootstrap3/images/screenshot.png" />
-    <meta property="og:image:secure_url"   content="https://knihovny.cz/themes/bootstrap3/images/screenshot.png" />
+    <meta property="og:description"        content="Knihovny pod jednou střechou. Využijte komfort a jednoduchost prohledávání fondů desítek českých knihoven současně. Využijte služeb knihoven, objednávejte, stahujte - kdykoliv a kdekoliv." />
+    <meta property="og:image"              content="https://www.knihovny.cz/themes/bootstrap3/images/screenshot_20171130.png" />
+    <meta property="og:image:secure_url"   content="https://www.knihovny.cz/themes/bootstrap3/images/screenshot_20171130.png" />
+    <meta property="og:image:type"         content="image/png" />
+    <meta name="referrer" content="unsafe-url" />
     <?=$this->headTitle()?>
     <?
       // Set up OpenSearch link:
@@ -80,7 +82,8 @@
             'Wrong email format' => 'Wrong email format',
             'caslin_tab_link' => 'caslin_tab_link',
             'Expand or collapse' => 'Expand or collapse',
-            'Do not forget to update search results' => 'Do not forget to update search results'
+            'Do not forget to update search results' => 'Do not forget to update search results',
+            'warning_safety_login' => 'warning_safety_login'
           )
         );
         // Add libphonenumber.js strings
@@ -93,6 +96,14 @@
             "'The string supplied is too long to be a phone number'" => 'libphonenumber_toolong',
             "'The string supplied is too short to be a phone number'" => 'libphonenumber_tooshort',
             "'Phone number too short after IDD'" => 'libphonenumber_tooshortidd'
+          )
+        );
+        // Add translation for sorting
+        $this->jsTranslations()->addStrings(
+          array(
+            'date_newest' => 'date_newest',
+            'date_oldest' => 'date_oldest',
+            'sort_relevance' => 'sort_relevance',
           )
         );
 
@@ -190,7 +201,26 @@
     <?=$this->headScript()->appendFile("geolocation.js");?>
   </head>
   <body data-ng-app="cpk" data-ng-controller="GlobalController as ctrl" class="<?=$this->layoutClass('offcanvas-row')?><? if ($this->layout()->rtl): ?> rtl<? endif; ?>">
-    <?=$this->render('cookies-agreement.phtml')?>
+  <!-- Facebook Pixel Code -->
+  <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window,document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '822054034585908');
+      fbq('track', 'PageView');
+  </script>
+  <noscript>
+      <img height="1" width="1"
+           src="https://www.facebook.com/tr?id=822054034585908&ev=PageView
+&noscript=1"/>
+  </noscript>
+  <!-- End Facebook Pixel Code -->
+  <?=$this->render('cookies-agreement.phtml')?>
     <?=$this->render('info.phtml')?>
     <? // Set up the search box -- there are three possible cases:
       // 1. No search box was set; we should default to the normal box
@@ -221,7 +251,7 @@
                  <?=$this->render('search/searchbox.phtml'); ?>
                  <?=$this->render('shib-assertion.phtml')?>
                  <a href="/Search/Inspiration" class="pull-left arrow-link"><i class="pr-interface-arrowleft"></i> <?=$this->transEsc("frontpage-left-arrow-link")?></a>
-                 <a href="/Libraries/List/" class="pull-right arrow-link">
+                 <a href="/Search/Results/?lookfor0[]=&type0[]=Libraries&bool0[]=AND&filter=&daterange=&publishDatefrom=&publishDateto=&limit=10&sort=relevance&page=1&searchTypeTemplate=basic&keepFacetsEnabled=true&join=AND" class="pull-right arrow-link">
                    <? $titleHtml = $this->transEsc("frontpage-right-arrow-link") ."<i class=\"pr-interface-arrowright\"></i>"; ?>
                    <?= $this->help()->getElementHelp('element_help_frontpage_right_arrow', $titleHtml, "mzk") ?>
                  </a>
@@ -245,7 +275,7 @@
                 <?=$this->render('shib-assertion.phtml')?>
               </div>
             </div>
-            <hr/>
+            <br/>
           <? endif; ?>
         <? endif; ?>
         <?=$this->layout()->content ?>

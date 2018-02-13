@@ -308,7 +308,8 @@ class SearchController extends SearchControllerBase
 	        }
 	    }
 
-	    return $this->createViewModel(
+        $this->layout()->history = true;
+        return $this->createViewModel(
 	        ['saved' => $saved, 'unsaved' => $unsaved, 'titles' => $titles]
 	        );
 	}
@@ -634,9 +635,25 @@ class SearchController extends SearchControllerBase
 	        return $this->redirectToSavedSearch($savedId);
 	    }
 
-	    // Send both GET and POST variables to search class:
+        $view->librarySearch = false;
+        $searchType = $this->params()->fromQuery('type0')[0];
+        if ($searchType == 'Libraries') {
+            $view->librarySearch = true;
+            $view->apikey = (isset($this->getConfig()->GoogleMaps->apikey) && ! empty($this->getConfig()->GoogleMaps->apikey)) ? $this->getConfig()->GoogleMaps->apikey : null;
+            $view->query = $this->params()->fromQuery('lookfor0')[0];
+        }
+
+        // Send both GET and POST variables to search class:
 	    $request = $this->getRequest()->getQuery()->toArray()
 	    + $this->getRequest()->getPost()->toArray();
+	    
+	    // EDS can't search with emtpy lookfor string,
+	    /* so we set it to 'FT Y OR FT N' for all results
+	    if($request['database'] == 'EDS'){
+		    if (empty($request['lookfor0'][0])){
+			$request['lookfor0'][0]='FT Y OR FT N';		
+		    }
+	    }*/
 
 	    if (! empty($request['filter'])) {
 	        $decompressedFilters = \LZCompressor\LZString::decompressFromBase64(specialUrlDecode($request['filter']));
@@ -659,6 +676,12 @@ class SearchController extends SearchControllerBase
 	       $view->sort = $searchesConfig->General->default_sort;
 	       $request['sort'] = $searchesConfig->General->default_sort;
 	    }
+
+        $edsConfig = $this->getConfig('EDS');
+        $edsDefaultLimit = $edsConfig['General']['default_limit'];
+        $solrDefaultLimit = $searchesConfig['General']['default_limit'];
+        $view->edsDefaultLimit = $edsDefaultLimit;
+        $view->solrDefaultLimit = $solrDefaultLimit;
 
 	    if (! empty($request['limit'])) {
 	        $_SESSION['VuFind\Search\Solr\Options']['lastLimit'] = $request['limit'];
@@ -701,8 +724,10 @@ class SearchController extends SearchControllerBase
 
 	    $runner = $this->getServiceLocator()->get('VuFind\SearchRunner');
 
+	    $database = ! empty($request['database']) ? $request['database'] : $this->searchClassId;
+
 	    $view->results = $results = $runner->run(
-	        $request, $this->searchClassId, $this->getSearchSetupCallback()
+	        $request, $database, $this->getSearchSetupCallback()
 	        );
 	    $view->params = $results->getParams();
 
@@ -799,8 +824,9 @@ class SearchController extends SearchControllerBase
 	    $searchesConfig = $this->getConfig('searches');
 	    $extraRequest['limit'] = $searchesConfig->General->records_switching_limit;
 	    $extraRequest['page'] = 1;
+        $database = ! empty($request['database']) ? $request['database'] : $this->searchClassId;
 	    $extraResultsForSwitching = $runner->run(
-	        $extraRequest, $this->searchClassId, $this->getSearchSetupCallback()
+	        $extraRequest, $database, $this->getSearchSetupCallback()
 	    );
 	    $extraResults = [];
 	    foreach($extraResultsForSwitching->getResults() as $record) {
@@ -904,7 +930,7 @@ class SearchController extends SearchControllerBase
 	{
 	    $results = $this->getResultsManager()->get('Solr');
 	    $params = $results->getParams();
-	    $params->initHomePageFacets();
+	    $params->setBasicSearch("");
 	    $params->setLimit(0);
 	    $results->getResults();
 
@@ -1149,6 +1175,14 @@ class SearchController extends SearchControllerBase
         /* Prepare referer */
         $viewData['referer'] = $this->base64url_encode($postParams['searchResultsUrl']);
 
+        $viewData['librarySearch'] = false;
+        $searchType = $request['type0'][0];
+        if ($searchType == 'Libraries') {
+            $viewData['librarySearch']  = true;
+            $viewData['apikey'] = (isset($this->getConfig()->GoogleMaps->apikey) && ! empty($this->getConfig()->GoogleMaps->apikey)) ? $this->getConfig()->GoogleMaps->apikey : null;
+            $viewData['query'] = $this->params()->fromQuery('lookfor0')[0];
+        }
+
         /* Set limit and sort */
         $searchesConfig = $this->getConfig('searches');
         $viewData['limit'] = (! empty($request['limit']))
@@ -1193,12 +1227,24 @@ class SearchController extends SearchControllerBase
             $viewData['sort'] = $request['sort'];
         }
 
+        $edsConfig = $this->getConfig('EDS');
+        $edsLimits = explode(",", $edsConfig['General']['limit_options']);
+        $edsMaxLimit = max($edsLimits);
+        $edsDefaultSorts = $this->getSortOptions($edsConfig['Sorting']);
+        $edsDefaultLimit = $edsConfig['General']['default_limit'];
+
+        $solrLimits = explode(",", $searchesConfig['General']['limit_options']);
+        $solrMaxLimit = max($solrLimits);
+        $solrDefaultSorts = $this->getSortOptions($searchesConfig['Sorting']);
+        $solrDefaultLimit = $searchesConfig['General']['default_limit'];
+
         $_SESSION['VuFind\Search\Solr\Options']['lastLimit'] = $this->layout()->limit = $viewData['limit'];
         $_SESSION['VuFind\Search\Solr\Options']['lastSort']  = $this->layout()->sort = $viewData['sort'];
         /**/
 
+        $database = ! empty($request['database']) ? $request['database'] : $this->searchClassId;
         $viewData['results'] = $results = $runner->run(
-            $request, $this->searchClassId, $this->getSearchSetupCallback()
+            $request, $database, $this->getSearchSetupCallback()
         );
         $viewData['params'] = $results->getParams();
 
@@ -1207,7 +1253,7 @@ class SearchController extends SearchControllerBase
         $extraRequest['limit'] = $searchesConfig->General->records_switching_limit;
         $extraRequest['page'] = 1;
         $extraResultsForSwitching = $runner->run(
-            $extraRequest, $this->searchClassId, $this->getSearchSetupCallback()
+            $extraRequest, $database, $this->getSearchSetupCallback()
         );
         $extraResults = [];
         foreach($extraResultsForSwitching->getResults() as $record) {
@@ -1304,17 +1350,47 @@ class SearchController extends SearchControllerBase
 
 	    $recordTotal = $viewData['results']->getResultTotal();
 
+        $lookfor = $results->getUrlQuery()->isQuerySuppressed() ? '' : $results->getParams()->getDisplayQuery();
+        $viewRender = $this->getServiceLocator()->get('ViewRenderer');
+        $title = $viewRender->translate('Search Results') . (empty($lookfor) ? '' : " - {$lookfor}");
+
 	    $data = [
+            'title' => $title,
             'viewData' => $viewData,
 	        'resultsHtml' => json_encode(['html' => $sanitizedResultsHtml]),
             'paginationHtml' => json_encode(['html' => $paginationHtml]),
             'resultsAmountInfoHtml' => json_encode(['html' => $resultsAmountInfoHtml]),
             'searchId' => $searchId,
 	        'sideFacets' => json_encode(['html' => $sideFacets]),
-	        'recordTotal' => $recordTotal
+	        'recordTotal' => $recordTotal,
+            'edsLimits' => json_encode(['data' => $edsLimits]),
+            'edsMaxLimit' => json_encode(['data' => $edsMaxLimit]),
+            'edsDefaultSorts' => json_encode(['data' => $edsDefaultSorts]),
+            'solrLimits' => json_encode(['data' => $solrLimits]),
+            'solrMaxLimit' => json_encode(['data' => $solrMaxLimit]),
+            'solrDefaultSorts' => json_encode(['data' => $solrDefaultSorts])
 	    ];
 
 	    return $data;
+    }
+
+    /**
+     * Return a list of urls for sorting, along with which option
+     *    should be currently selected.
+     *
+     * @return array Sort urls, descriptions and selected flags
+     */
+    public function getSortOptions($config)
+    {
+        $renderer = $this->getViewRenderer();
+        $list = [];
+        foreach ($config as $sort => $desc) {
+            $list[] = [
+                'key' => $sort,
+                'value' => $renderer->translate($desc)
+            ];
+        }
+        return $list;
     }
 
     /**
@@ -1414,29 +1490,23 @@ class SearchController extends SearchControllerBase
     {
         $view = $this->createViewModel();
 
-        $frontendTable = $this->getTable('frontend');
-        $widgetNames = $frontendTable->getInspirationWidgets();
-
         $widgetTable = $this->getTable('widget');
-        $widgets = [];
 
-        foreach ($widgetNames as $key => $widgetName) {
-            $widget = $widgetTable->getWidgetByName($widgetName);
-            if ($widgetName == 'infobox') {
+        $sortedInspirationsWidgets = $widgetTable->getWidgets(true, true, true);
+        $lastInspirationsWidgetsPosition = $widgetTable->getLastInspirationsWidgetsPosition();
+
+        foreach ($sortedInspirationsWidgets as $inspirationsWidget) {
+            if ($inspirationsWidget->getName() == 'infobox') {
                 $infoboxTable = $this->getTable("infobox");
-                $infoboxItems = $infoboxTable->getActualItems($widget->getShownRecordsNumber());
-                $widget->setContents($infoboxItems);
-            } else if ($widgetName == 'conspectus') {
-                // do nothing, there is view prepared for it.
-                $widget = new \CPK\Widgets\Widget();
-                $widget->setName($widgetName);
+                $infoboxItems = $infoboxTable->getActualItems($inspirationsWidget->getShownRecordsNumber());
+                $inspirationsWidget->setContents($infoboxItems);
             } else {
-                $widget->setContents($this->getWidgetContent($widgetName, $widget->getShownRecordsNumber()));
+                $inspirationsWidget->setContents($this->getWidgetContent($inspirationsWidget->getName(), $inspirationsWidget->getShownRecordsNumber()));
             }
-            $widgets[][$widgetName] = $widget;
         }
 
-        $view->widgets = $widgets;
+        $view->lastInspirationsWidgetsPosition = $lastInspirationsWidgetsPosition;
+        $view->sortedInspirationsWidgets = $sortedInspirationsWidgets;
 
         if (! empty($this->params()->fromPost('mylang'))) {
             $languageCode = $this->params()->fromPost('mylang');
@@ -1479,8 +1549,6 @@ class SearchController extends SearchControllerBase
         $searchesConfig = $this->getConfig('searches');
         // If user have preferred limit and sort settings
         if ($user = $this->getAuthManager()->isLoggedIn()) {
-            $userSettingsTable = $this->getTable("usersettings");
-
             $userSettingsTable = $this->getTable("usersettings");
             $preferredRecordsPerPage = $userSettingsTable->getRecordsPerPage($user);
             $preferredSorting = $userSettingsTable->getSorting($user);

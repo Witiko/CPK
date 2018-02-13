@@ -173,10 +173,6 @@ class DeduplicationListener
                 if ($this->enabled) {
                     $params->set('uniqueId', 'local_ids_str_mv');
                     $fq = '-merged_child_boolean:true';
-                    if ($context == 'similar' && $id = $event->getParam('id')) {
-                        $fq .= ' AND -local_ids_str_mv:"'
-                            . addcslashes($id, '"') . '"';
-                    }
                 } else {
                     $fq = '-merged_boolean:true';
                 }
@@ -386,6 +382,9 @@ class DeduplicationListener
     protected function determineBuildingPriority($params)
     {
         $result = [];
+        if ($params->get('fq') == null) {
+            return $result;
+        }
         foreach ($params->get('fq') as $fq) {
             if (preg_match_all(
                 '/\bbuilding:"([^"]+)"/',
@@ -441,6 +440,9 @@ class DeduplicationListener
         }
         $institutionMappings = array_flip($facetConfig->InstitutionsMappings->toArray());
         $result = [];
+        if ($params->get('fq') == null) {
+            return $result;
+        }
         foreach ($params->get('fq') as $fq) {
             if (preg_match(self::OR_FACETS_REGEX, $fq, $matches)) {
                 $field = $matches[2];

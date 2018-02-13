@@ -15,7 +15,7 @@
   $countRecords = count($records);
 
   if ($countRecords) {
-      // put caslin at the end and cnb before caslin, when available
+      // put caslin at the end and anl before caslin, when available
       // but keep at the front when is set in facet params
       $filters = $params->getFilters();
 
@@ -34,17 +34,17 @@
               if (strpos($institution,'CASLIN') !== false) {
                   $caslinFoundInFilters++;
               }
-              if (strpos($institution,'CNB') !== false) {
-                  $cnbFoundInFilters++;
+              if (strpos($institution,'ANL') !== false) {
+                  $anlFoundInFilters++;
               }
           }
       }
 
       if ($cnbFoundInFilters == 0) {
-          if (isset($records['cnb'])) {
-              $cnb = $records['cnb'];
-              unset($records['cnb']);
-              $records['cnb'] = $cnb;
+          if (isset($records['anl'])) {
+              $anl = $records['anl'];
+              unset($records['anl']);
+              $records['anl'] = $anl;
           }
       }
 
@@ -153,18 +153,20 @@
   $recordsInLibraries = $prependedLibraries + $foundRecords;
 
   $firstRecordInInstitutions = reset($recordsInLibraries);
-
 ?>
 <div class="<?=$this->driver->supportsAjaxStatus()?'ajaxItem ':''?>col-xs-12">
     <div class="white-box clearfix">
     <div class="row">
+        <? $recordId =  preg_replace("/\./", "", $recordId)?>
+        <? $recordId =  preg_replace("/:/", "", $recordId)?>
+        <? $bibinfo = $this->record($this->driver)->getObalkyKnihJSONV3()?>
+        <? if (!($this->driver instanceof CPK\RecordDriver\SolrLibrary)): ?>
         <div class="col-sm-2 col-xs-3 left">
-            <? $recordId =  preg_replace("/\./", "", $recordId)?>
-            <? $recordId =  preg_replace("/:/", "", $recordId)?>
-            <? if ($this->params->getSearchType() == 'advanced'): ?>
-            <a href='/Record/<?=$firstRecordInInstitutions['id']?>?referer=<?=$this->referer?>' title='<?=$this->driver->getTitle()?>' tabindex='-1' style='cursor: pointer;'>
+
+            <? if ($this->fromEmailSearch): ?>
+            <a href='/Record/<?=$this->driver->getUniqueID()?>' title='<?=htmlspecialchars($this->driver->getTitle())?>' tabindex='-1' style='cursor: pointer;'>
             <? else: ?>
-            <a href='/Record/<?=$firstRecordInInstitutions['id']?>?referer=<?=$this->referer?>' title='<?=$this->driver->getTitle()?>' tabindex='-1' style='cursor: pointer;'>
+            <a href='/Record/<?=$firstRecordInInstitutions['id']?>?referer=<?=$this->referer?>' title='<?=htmlspecialchars($this->driver->getTitle())?>' tabindex='-1' style='cursor: pointer;'>
             <? endif;?>
             	<div class="coverThumbnail cover_<?=$recordId?>">
 
@@ -189,20 +191,29 @@
             <input type="hidden" value="<?=$this->escapeHtmlAttr($this->driver->getUniqueID())?>" class="hiddenId" />
             <input type="hidden" value="<?=$this->escapeHtmlAttr($this->driver->getResourceSource())?>" class="hiddenSource" />
         </div>
-    <div class="col-sm-7 col-xs-7 middle search-result-container">
+        <? endif; ?>
+    <div class="<? if (!($this->driver instanceof CPK\RecordDriver\SolrLibrary)): ?>col-sm-7 col-xs-7<? else: ?>library-result<? endif; ?> middle search-result-container">
       <div class="root-title">
-        <? if ($this->params->getSearchType() == 'advanced'): ?>
-        <a href="/Record/<?=$firstRecordInInstitutions['id']?>?referer=<?=$this->referer?>" class="title">
+        <? if ($this->fromEmailSearch): ?>
+            <a href="/Record/<?=$this->driver->getUniqueID()?>" class="title">
         <? else: ?>
-        <a href="/Record/<?=$firstRecordInInstitutions['id']?>?referer=<?=$this->referer?>" class="title">
+            <a href="/Record/<?=$firstRecordInInstitutions['id']?>?referer=<?=$this->referer?>" class="title">
         <? endif;?>
+
         <?
           $summHighlightedTitle = $this->driver->getHighlightedTitle();
           $summTitle = $this->driver->getTitle();
+        ?>
+        <? if ($this->driver instanceof CPK\RecordDriver\SolrLibrary): ?>
+            <?  $libraryTitle = $this->driver->getLibraryNames();?>
+        <? endif; ?>
+            <?
           if (!empty($summHighlightedTitle)) {
             echo $this->highlight($this->addEllipsis($summHighlightedTitle, $summTitle));
           } else if (!empty($summTitle)) {
-            echo $this->escapeHtml($this->truncate($summTitle, 180));
+              echo $this->escapeHtml($this->truncate($summTitle, 180));
+          } else if (!empty($libraryTitle)) {
+              echo $this->escapeHtml($this->truncate($libraryTitle, 180));
           } else {
             echo $this->transEsc('Title not available');
           }
@@ -214,29 +225,31 @@
         <? if($this->driver->isCollection()): ?>
           <?=implode('<br>', $this->driver->getSummary()); ?>
         <? else: ?>
-          <? $summAuthor = $this->driver->getPrimaryAuthor();
+          <? $authors = $this->driver->getDeduplicatedAuthors();
+            $summAuthor = $this->driver->getPrimaryAuthor();
             if (!empty($summAuthor)):
             $summHighlightedAuthor = $this->driver->getHighlightedAuthor();
             $author = !empty($summHighlightedAuthor)
                 ? $this->highlight($summHighlightedAuthor)
                 : $this->escapeHtml($summAuthor);
-          ?>
-          <?
-            $authors = $this->driver->getDeduplicatedAuthors();
+
             $authorityId = $this->driver->getMainAuthorAuthorityId();
             $secondaryAuthoritiesIds = $this->driver->getSecondaryAuthoritiesIds();
-          ?>
-          <?
+
             if (isset($authors['main']) && !empty($authors['main'])) {
                 $localAuthorityId = $this->record($this->driver)->getRecordIdByAuthority($authorityId);
             }
           ?>
-          <a title='<?=$this->translate('Show publications by')?> <?=$this->escapeHtml($authors['main'])?>' class='author-info' href="/Search/Results?sort=relevance&join=AND&type0[]=adv_search_author_corporation&bool0[]=AND&searchTypeTemplate=advanced&lookfor0[]=<?=urlencode($author)?>">
+          <a title='<?=$this->translate('Show publications by')?> <?=$this->escapeHtml($authors['main'])?>' class='author-info' href="/Search/Results?sort=relevance&join=AND&type0[]=adv_search_author_corporation&bool0[]=AND&searchTypeTemplate=advanced&lookfor0[]=<?=urlencode($authors['main'])?>">
           <?=$author?>
           </a>
           <? if (! empty($localAuthorityId)): ?>
               &nbsp;<a title="<?=$this->translate('Show person')?> <?=$authors['main']?>" href="/Record/<?=$localAuthorityId?>"><i class="pr-user-single5 author-icon"></i></a>
-          <? endif; ?>
+          <? endif;
+             elseif (isset($authors['corporate']) && !empty($authors['corporate'])):?>
+               <a title='<?=$this->translate('Show publications by')?> <?=$this->escapeHtml($authors['corporate'])?>' class='author-info' href="/Search/Results?sort=relevance&join=AND&type0[]=adv_search_author_corporation&bool0[]=AND&searchTypeTemplate=advanced&lookfor0[]=<?=urlencode($authors['corporate'])?>">
+                 <?=$this->escapeHtml($authors['corporate'])?>
+               </a>
           <? endif; ?>
 		<span class='summDate'>
           <? $journalTitle = $this->driver->getContainerTitle(); $summDate = $this->driver->getPublicationDates(); ?>
@@ -245,10 +258,25 @@
             <?=/* TODO: handle highlighting more elegantly here */ $this->transEsc('Published in') . ' <a href="' . $this->record($this->driver)->getLink('journaltitle', str_replace(array('{{{{START_HILITE}}}}', '{{{{END_HILITE}}}}'), '', $journalTitle)) . '">' . $this->highlight($journalTitle) . '</a>';?>
             <?=!empty($summDate) ? ' (' . $this->escapeHtml($summDate[0]) . ')' : ''?>
           <? elseif (!empty($summDate)): ?>
-            <?=!empty($summAuthor) ? '<br>' : ''?>
+            <?=!empty($summAuthor) || !empty($authors['corporate']) ? '<br>' : ''?>
             <?='' . $this->escapeHtml($summDate[0])?>
           <? endif; ?>
 		</span>
+            <? if ($this->driver instanceof CPK\RecordDriver\SolrLibrary): ?>
+
+                    <? $addresses = $this->driver->getLibraryAddress(); if (!empty($addresses)): ?>
+                    <p><i class="pr-location-pinmap5"></i>
+                        <? foreach ($addresses as $address): ?><?= $this->escapeHtml($address)?><br/><? endforeach; ?>
+                    </p>
+                    <? endif; ?>
+
+                <? $bookSearch = $this->driver->getBookSearchFilter(); if (!empty($bookSearch)): ?>
+                    <? $filter = specialUrlEncode(\LZCompressor\LZString::compressToBase64('local_institution_facet_str_mv:"'.$this->driver->getBookSearchFilter().'"')); ?>
+                    <a href='/Search/Results?lookFor0[]=&type0[]=AllFields&bool0[]=AND&join=AND&searchTypeTemplate=basic&page=1&keepEnabledFilters=true&limit=<?=$this->layout()->limit?>&sort=<?=$this->layout()->sort?>&filter=<?=$filter?>' title='<?=$this->translate('Search in library')?>' >
+                        <?=$this->transEsc('Search in library')?>
+                    </a>
+                <? endif; ?>
+            <? endif; ?>
 
           <? $summInCollection = $this->driver->getContainingCollections(); if (!empty($summInCollection)): ?>
             <? foreach ($summInCollection as $collId => $collText): ?>
@@ -273,23 +301,29 @@
 
       <? $summ = $this->driver->getSummary(); ?>
       <? if (!empty($summ)): ?>
-        <? foreach ($summ as $field): ?>
-          <? $secondPart = substr($field, 200); ?>
-          <? $spacePosition = strpos($secondPart, ' '); ?>
-          <? if (empty($spacePosition) && ($spacePosition > 20)): ?>
-            <? $spacePosition = 0; ?>
-          <? endif; ?>
-          <? if ((! empty($secondPart)) && (preg_match('/[.,?!]/', $field[199 + $spacePosition]))): ?>
-            <? $spacePosition = $spacePosition - 1; ?>
-          <? endif; ?>
-          <p><?=$this->escapeHtml(substr($field, 0, 200 + $spacePosition))?><? if (! empty($secondPart)): ?>...<? endif; ?></p>
-        <? endforeach; ?>
+        <? if ($this->driver instanceof CPK\RecordDriver\SolrDictionary): ?>
+          <? foreach ($summ as $field): ?>
+            <p><?=$this->escapeHtml($field)?></p>
+          <? endforeach; ?>
+        <? else: ?>
+          <? foreach ($summ as $field): ?>
+            <? $secondPart = substr($field, 200); ?>
+            <? $spacePosition = strpos($secondPart, ' '); ?>
+            <? if (empty($spacePosition) && ($spacePosition > 20)): ?>
+              <? $spacePosition = 0; ?>
+            <? endif; ?>
+            <? if ((! empty($secondPart)) && (preg_match('/[.,?!]/', $field[199 + $spacePosition]))): ?>
+              <? $spacePosition = $spacePosition - 1; ?>
+            <? endif; ?>
+            <p><?=$this->escapeHtml(substr($field, 0, 200 + $spacePosition))?><? if (! empty($secondPart)): ?>...<? endif; ?></p>
+          <? endforeach; ?>
+        <? endif; ?>
       <? else: ?>
           <script type="text/javascript">
               obalky.display_summary_short(".summ_<?=$recordId?>", <?=$bibinfo?>);
           </script>
 
-          <span class="summ_<?=$recordId?>"><i class="fa fa-spinner fa-spin"></i><?=$this->transEsc('loading_obalkyknih_summary')?></span>
+          <span class="summ_<?=$recordId?>"><i class="fa fa-spinner fa-spin"></i>&nbsp;<?=$this->transEsc('loading_obalkyknih_summary')?></span><br/>
 
       <? endif; ?>
 
@@ -336,28 +370,31 @@
         	  <?=$this->record($this->driver)->getFormatList()?>
       		</div>
 		  </div>
-		  <div class='col-md-4 search-results-favorite-button hidden pull-right'>
-    		<? if ($this->userlist()->getMode() !== 'disabled'):
-                $controllerClass = 'controller:' . $this->record($this->driver)->getController();
-                $handleOfflineFavorites = ! $this->isLoggedIn && $this->offlineFavoritesEnabled; ?>
-        	<li class="list-group-item">
-			<a id="save-record" class="modal-link <?=$controllerClass?>"
+            <? if (!$this->librarySearch) : ?>
+              <div class='col-md-4 search-results-favorite-button hidden pull-right'>
+                <? if ($this->userlist()->getMode() !== 'disabled'):
+                    $controllerClass = 'controller:' . $this->record($this->driver)->getController();
+                    $handleOfflineFavorites = ! $this->isLoggedIn && $this->offlineFavoritesEnabled; ?>
+                <li class="list-group-item">
+                    <a id="save-record" class="to-favorites-link modal-link <?=$controllerClass?>"
+                     <? if ($handleOfflineFavorites) : ?>
+                        href="/Record/<?=$this->driver->getUniqueID()?>" onclick="return false;" data-ng-click="searchFavCtrl.addOrRemoveFavorite(<?=isset($_ENV['currentRecordNo']) ? $_ENV['currentRecordNo'] : '' ?>)"
+                    <? else: ?>
+                        href="<?=$this->recordLink()->getActionUrl($this->driver, 'Save')?>"
+                    <? endif; ?>
 
-  	         <? if ($handleOfflineFavorites) : ?>
-        		href="#" data-ng-click="searchFavCtrl.addOrRemoveFavorite(<?=isset($_ENV['currentRecordNo']) ? $_ENV['currentRecordNo'] : '' ?>)"
-    	    <? else: ?>
-        		href="<?=$this->recordLink()->getActionUrl($this->driver, 'Save')?>"
+                    title="<?=$this->transEsc('Add to favorites')?>" rel="nofollow"><i class="pr-interface-favoritestar"> </i>
+                    <span data-add-remove-search="add<?=isset($_ENV['currentRecordNo']) ? ':' . $_ENV['currentRecordNo'] : '' ?>"><?=$this->transEsc('Add to favorites')?></span>
+                    <span data-add-remove-search="rem<?=isset($_ENV['currentRecordNo']) ? ':' . $_ENV['currentRecordNo'] : '' ?>" hidden ><b><?=$this->transEsc('remove_from_favorites')?></b></span>
+                    </a>
+                </li>
+              <? endif; ?>
+              </div>
             <? endif; ?>
-
-    		title="<?=$this->transEsc('Add to favorites')?>" rel="nofollow"><i class="pr-interface-favoritestar"> </i>
-    		<span data-add-remove-search="add<?=isset($_ENV['currentRecordNo']) ? ':' . $_ENV['currentRecordNo'] : '' ?>"><?=$this->transEsc('Add to favorites')?></span>
-    		<span data-add-remove-search="rem<?=isset($_ENV['currentRecordNo']) ? ':' . $_ENV['currentRecordNo'] : '' ?>" hidden ><b><?=$this->transEsc('remove_from_favorites')?></b></span>
-    		</a></li>
-      	  <? endif; ?>
-		  </div>
 		</div>
 
     </div>
+    <? if (!($this->driver instanceof CPK\RecordDriver\SolrLibrary)): ?>
     <div class="col-sm-3 col-xs-12 right">
     <?
      if ($records) {
@@ -402,6 +439,7 @@
 
       <?=$this->driver->supportsCoinsOpenUrl()?'<span class="Z3988" title="'.$this->escapeHtmlAttr($this->driver->getCoinsOpenUrl()).'"></span>':''?>
     </div>
+    <? endif; ?>
   </div>
   </div>
 

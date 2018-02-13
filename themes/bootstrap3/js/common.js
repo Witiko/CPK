@@ -332,11 +332,15 @@ function setupAutocomplete() {
   $('.autocomplete').each(function(i, op) {
     $(op).autocompleteVufind({
       maxResults: 6,
+      cache: false,
       loadingString: VuFind.translate('loading')+'...',
       handler: function(query, cb) {
-        var searcher = extractClassParams(op);
+        var searcher = $( 'input[name=database]' ).val();
+        if (!$(op).hasClass('autocomplete') || searcher == 'EDS') {
+            cb([]);
+            return;
+        }
         var currentUrl = decodeURIComponent($(location).attr('search'));
-        //console.log('CurrentUrl: '+currentUrl);
         var filters = $( '.searchFormKeepFilters' ).is(':checked') 
         	? getURLParam('filter[]', currentUrl) 
         	: 'null';
@@ -344,10 +348,10 @@ function setupAutocomplete() {
           url: VuFind.getPath() + '/AJAX/JSON',
           data: {
             q:query,
-            method:'getACSuggestions',
+            method: 'getACSuggestions',
             filters: filters,
-            searcher:searcher['searcher'],
-            type:searcher['type'] ? searcher['type'] : $(op).closest('.searchForm').find('.searchForm_type').val()
+            searcher: searcher,
+            type: $(op).closest('.searchForm').find('.searchForm_type').val()
           },
           dataType:'json',
           success: function(json) {
@@ -518,25 +522,35 @@ jQuery( document ).ready( function( $ ){
 			}
 		}
 	});
-  
+
     /* Change language */
 	$( 'nav' ).on( 'click', '.change-language', function( event ){
 		event.preventDefault();
-		
+
 		var language = $( this ).attr( 'data-lang' );
-		
+
 		if ( event.ctrlKey ){
-			var currentUrl = window.location.href;
-			window.open( $( this ).attr( 'href' ), '_blank' );
-			return false;
+            document.langForm.setAttribute('target', '_blank');
 		}
-		
+
 		changeLanguage(language);
-	}); 
-	
-	var changeLanguage = function(language) {
+	});
+
+    var changeLanguage = function(language) {
 		document.langForm.mylang.value = language;
 		document.langForm.submit();
-	}
-	
+	};
+
+  $('.show-next-institutions').click( function () {
+    var currentMenu = $(this).siblings('.scrollable-menu');
+    var windowsize = $(window).width();
+    if (windowsize < 480) {
+      if (currentMenu.is(':visible')) {
+        currentMenu.slideUp()
+      }
+      else {
+        currentMenu.slideDown()
+      }
+    }
+  })
 });
