@@ -1092,10 +1092,11 @@ class MyResearchController extends MyResearchControllerBase
             ? $preferedCitationStyle
             : $defaultCitationStyle;
 
+
         $viewVars['selectedCitationStyle']   = $selectedCitationStyle;
         $viewVars['availableCitationStyles'] = $availableCitationStyles;
         $viewVars['institutions']            = $this->getInstitutions(true);
-        $viewVars['preferredInstitutions']   = explode(";", $userSettingsTable->getSavedInstitutions($user));
+        $viewVars['preferredInstitutions']   = array_filter(explode(";", $userSettingsTable->getSavedInstitutions($user)));
 
         /* Records per page fieldset */
         $searchesConfig = $this->getConfig('searches');
