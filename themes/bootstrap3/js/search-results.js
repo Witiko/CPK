@@ -1107,6 +1107,7 @@ jQuery( document ).ready( function( $ ) {
 		
 		if ( event.ctrlKey ){
 		     window.open( $( this ).attr( 'href' ), '_blank' );
+            $( this ).removeClass( 'jstree-clicked active' );
 		     return false;
 		}
 		
