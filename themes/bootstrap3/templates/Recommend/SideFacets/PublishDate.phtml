@@ -1,0 +1,69 @@
+<?
+/**
+ * Project: www.knihovny.cz
+ * User: Zdeněk Nováček
+ * Email: znovacek1997@gmail.com
+ * Date: 10.4.18
+ */
+?>
+
+
+<?
+$min = !empty($rangeFacets[$title]['values'][0]) ? min($rangeFacets[$title]['values'][0], 1400) : 1400;
+$future = date('Y', time()+31536000);
+$max = !empty($rangeFacets[$title]['values'][1]) ? max($future, $rangeFacets[$title]['values'][1]) : $future;
+$low  = !empty($rangeFacets[$title]['values'][0]) ? $rangeFacets[$title]['values'][0] : $min;
+$high = !empty($rangeFacets[$title]['values'][1]) ? $rangeFacets[$title]['values'][1] : $max;
+$reversed = $this->layout()->rtl ? 'true' : 'false';
+?>
+    <div class="list-group-item">
+        <?=$results->getUrlQuery()->asHiddenFields(array('page' => "/./", 'filter' => "/^{$title}:.*/"))?>
+        <input type="hidden" name="<?=$this->escapeHtmlAttr($rangeFacets[$title]['type'])?>range[]" value="<?=$this->escapeHtmlAttr($title)?>"/>
+        <div class="row">
+            <? $extraInputAttribs = ($rangeFacets[$title]['type'] == 'date') ? 'maxlength="4" ' : ''; ?>
+            <div class="col-sm-6">
+                <label for="<?=$this->escapeHtmlAttr($title)?>from">
+                    <?=$this->transEsc('date_from')?>:
+                </label>
+                <input type="text" class="form-control" name="<?=$this->escapeHtmlAttr($title)?>from" id="<?=$this->escapeHtmlAttr($title)?>from" value="<?=$low?>" placeholder="<?=$min?>" <?=$extraInputAttribs?>/>
+            </div>
+            <div class="col-sm-6">
+                <label for="<?=$this->escapeHtmlAttr($title)?>to">
+                    <?=$this->transEsc('date_to')?>:
+                </label>
+                <input type="text" class="form-control" name="<?=$this->escapeHtmlAttr($title)?>to" id="<?=$this->escapeHtmlAttr($title)?>to" value="<?=$high?>" placeholder="<?=$max?>" <?=$extraInputAttribs?>/>
+            </div>
+        </div>
+        <? if ($rangeFacets[$title]['type'] == 'date'): ?>
+            <div class="slider-container"><input type="text" class="hidden" id="<?=$this->escapeHtmlAttr($title)?><?=$this->escapeHtml($rangeFacets[$title]['type'])?>Slider"/></div>
+        <? endif; ?>
+        <div style="text-align: center; margin-top: 10px;">
+            <button class="btn btn-default apply-facet-filter-range"><?=$this->transEsc('Use filters')?></button>
+        </div>
+    </div>
+<? if ($rangeFacets[$title]['type'] == 'date'): ?>
+    <? $this->headScript()->appendFile('vendor/bootstrap-slider.js'); ?>
+    <?
+    $script = <<<JS
+$(document).ready(function() {
+  var fillTexts = function() {
+  var v = {$this->escapeHtmlAttr($title)}dateSlider.getValue();
+  $('#{$this->escapeHtmlAttr($title)}from').val(v[0]);
+  $('#{$this->escapeHtmlAttr($title)}to').val(v[1]);
+  };
+  var {$this->escapeHtmlAttr($title)}dateSlider = $('#{$this->escapeHtmlAttr($title)}dateSlider')
+  .slider({
+    'min':{$min},
+    'max':{$max},
+    'handle':"square",
+    'tooltip':"hide",
+    'value':[{$low},{$high}],
+    'reversed': {$reversed}
+  })
+  .on('slide', fillTexts)
+  .data('slider');
+});
+JS;
+    ?>
+    <?=$this->inlineScript(\Zend\View\Helper\HeadScript::SCRIPT, $script, 'SET'); ?>
+<? endif; ?>
