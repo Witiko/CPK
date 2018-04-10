@@ -59,6 +59,10 @@ class SideFacets extends SideFacetsBase
      */
     protected $timelineFacets = [];
 
+    protected $allFieldsSection = [];
+
+    protected $librariesSection = [];
+
     /**
      * Store the configuration of the recommendation module.
      *
@@ -147,6 +151,18 @@ class SideFacets extends SideFacetsBase
             $this->timelineFacets = $config->SpecialFacets->timeline->toArray();
         }
 
+        // List of facets in AllFields:
+        if (isset($config->SpecialFacets->allFieldsSection)) {
+            $this->allFieldsSection
+                = $config->SpecialFacets->allFieldsSection->toArray();
+        }
+
+        // List of facets in Libraries:
+        if (isset($config->SpecialFacets->librariesSection)) {
+            $this->librariesSection
+                = $config->SpecialFacets->librariesSection->toArray();
+        }
+
     }
 
     /**
@@ -179,11 +195,11 @@ class SideFacets extends SideFacetsBase
         $facetSet = parent::getFacetSet();
         $newFacetSet = [];
         foreach ($this->mainFacets as $name => $desc) {
-            if (in_array($name, $this->ajaxFacets)) {
+            /*if (in_array($name, $this->ajaxFacets)) {
                 $newFacetSet[$name] = ['label' => $desc, 'list' => [], 'ajax' => true ];
-            } else {
+            } else {*/
                 $newFacetSet[$name] = &$facetSet[$name];
-            }
+            //}
         }
         return $newFacetSet;
     }
@@ -202,6 +218,16 @@ class SideFacets extends SideFacetsBase
     public function getTimelineFacets()
     {
         return $this->timelineFacets;
+    }
+
+    public function getAllFieldsSection()
+    {
+        return $this->allFieldsSection;
+    }
+
+    public function getLibrariesSection()
+    {
+        return $this->librariesSection;
     }
 
 }

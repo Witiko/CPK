@@ -1,3 +1,9 @@
+<?= $this->render("Recommend/AssideFacets.phtml"); ?>
+
+
+
+
+
 <? $results = $this->recommend->getResults(); ?>
 <? $checkboxFilters = $results->getParams()->getCheckboxFacets(); if (count($checkboxFilters) > 0): ?>
 <? $filterClass = (!isset($this->searchClassId) || $this->searchClassId == 'Solr') ? 'facet-filter' : 'facet-filter-central-index';?>

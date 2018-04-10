@@ -1,3 +1,21 @@
+function createFacets(facets) {
+    //console.log(facets);
+    var html = '';
+    //console.log(facets.label);
+    html += '<b>'+facets.label+'</b><br>';
+    for (var i = 0; i < facets.list.length; i++) {
+        //console.log(i);
+        //var pokus = novy[i];
+
+        //console.log(facets.list[i].displayText);
+        html += facets.list[i].displayText+'<br>';
+    }
+    document.getElementById("side-panel-"+facets.label).innerHTML = html;
+}
+
+
+
+
 /*global htmlEncode, VuFind */
 function buildFacetNodes(data, currentPath, allowExclude, excludeTitle, counts)
 {

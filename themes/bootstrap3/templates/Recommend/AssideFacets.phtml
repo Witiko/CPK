@@ -1,0 +1,168 @@
+<?
+/**
+ * Project: www.knihovny.cz
+ * User: Zdeněk Nováček (BlueEyedBoy)
+ * Email: znovacek1997@gmail.com
+ * Date: 10.4.18
+ */
+?>
+
+<?
+$results = $this->recommend->getResults();
+?>
+
+<aside>
+  <?
+  $checkboxFilters = $results->getParams()->getCheckboxFacets();
+  if (count($checkboxFilters) > 0) {
+    $filterClass = (!isset($this->searchClassId) || $this->searchClassId == 'Solr') ? 'facet-filter' : 'facet-filter-central-index';
+
+    $filterTranslations = [
+        'eds_limiter_FT' => 'find_fulltext_documents_only',
+        'eds_limiter_RV' => 'find_reviewed_documents_only',
+        'eds_expander_fulltext' => 'serach_also_fulltexts_of_documents',
+    ];
+
+    $html = '';
+    $shown = 0;
+    foreach ($checkboxFilters as $current) {
+      $html .= '<label class="checkbox';
+      if ($results->getResultTotal() < 1 && !$current['selected'] && !$current['alwaysVisible']) {
+        $html .= ' hidden';
+      } else {
+        $shown++;
+      }
+      $html .= '"><input type="checkbox" class="jsTreeLikeCheckbox" name="filter[]" value="' . $this->escapeHtmlAttr($current['filter']) . '"' . ($current['selected'] ? 'checked="checked"' : '') . ' id="' . $this->escapeHtmlAttr(str_replace(' ',
+              '', $current['desc'])) . '"/>';
+      $html .= '<span class="jsTreeLikeCheckboxDescription">' . $this->translate($filterTranslations[$current['desc']]) . '</span>';
+      $html .= '</label>';
+    }
+  }
+
+
+  $extraFilters = isset($this->extraSideFacetFilters) ? $this->extraSideFacetFilters : array();
+  $collapsedFacets = $this->recommend->getCollapsedFacets();
+  $hierarchicalFacetSortOptions = $this->recommend->getHierarchicalFacetSortOptions();
+  $hierarchicalFacets = $this->recommend->getHierarchicalFacets();
+  $queryParams = $results->getUrlQuery()->getParamArray();
+  unset($queryParams['filter']);
+
+  $allFieldsSection = $this->recommend->getAllFieldsSection();
+  $librariesSection = $this->recommend->getLibrariesSection();
+
+  $i = '?';
+  $removeFilterUrl = '/Search/Results';
+  foreach ($queryParams as $key => $value) {
+    if (is_array($value)) {
+      $value = $value[0];
+      $key .= "[]";
+    }
+    $removeFilterUrl .= $i . $key . '=' . urlencode($value);
+
+    if ($i === '?') {
+      $i = '&';
+    }
+  }
+  ?>
+
+  <? if ($results->getResultTotal() > 0): ?>
+    <h3 class='side-facets-header facets-questionmark-help'>
+      <?= $this->transEsc(isset($this->overrideSideFacetCaption) ? $this->overrideSideFacetCaption : 'Narrow Search') ?>
+      <?= ($this->librarySearch)? ('adr-facets') : ($filterClass)? $this->help()->getQuestionMarkHelp('ci-facets') : $this->help()->getQuestionMarkHelp('facets') ;?>
+    </h3>
+  <? endif; ?>
+
+
+  <? $filterList = array_merge($results->getParams()->getFilterList(true), $extraFilters); ?>
+<!-- vypis filtr BEGIN -->
+  <? if (!empty($filterList)): ?>
+  <div class="list-group filters">
+    <? foreach ($filterList as $field => $filters): ?>
+
+      <? foreach ($filters as $i => $filter): ?>
+
+        <?= $filter['displayText'].'<br>'; ?>
+
+      <? endforeach; ?>
+
+    <? endforeach; ?>
+    <div class='text-center'>
+      <a id='remove-all-filters-async' href='<?=$removeFilterUrl?>'><div class="btn btn-primary btn-sm"><?=$this->transEsc('Remove Filters')?></div></a>
+    </div>
+  </div>
+  <? endif; ?>
+<!-- vypis filtr END -->
+
+<!-- toto nevim co je BEGIN -->
+  <div class="checkboxFilter<?if($shown == 0):?> hidden<? endif; ?>">
+    <div id="side-panel-eds-filters">
+      <?=$html?>
+    </div>
+  </div>
+<!-- toto nevim co je END -->
+
+  <?= isset($this->sideFacetExtraControls) ? $this->sideFacetExtraControls : '' ?>
+  <?
+  /*
+   * @TODO tahat si ze solru jen data ktere potrebuji ne vsechny facety a pak je filtrovat ktery zobrazovat
+   */
+  $sideFacetSet = $this->recommend->getFacetSet();
+  $rangeFacets = $this->recommend->getAllRangeFacets();
+  ?>
+
+
+  <? if (!empty($sideFacetSet) && $results->getResultTotal() > 0) {
+    foreach ($sideFacetSet as $title => $cluster) {
+// ==========================
+// @TODO rozdelit kdy se ma porovnavat s librariesSection a kdy s allFieldsSection
+// sideFacetSet se orezava uz nekde driv... hraje v tom roli ajax v configuraku
+// ==========================
+      if (in_array($cluster['label'],($this->layout()->headerType != "newlibraries")? $allFieldsSection : $librariesSection)) {
+        /*
+         * @TODO pokud $cluster['label'] bude rok vydani tak includni sablonu a continue
+         */
+        if ($cluster['label'] == 'adv_search_year') {
+          include_once 'SideFacets/PublishDate.phtml';
+          continue;
+        }
+        ?>
+        <div class="list-group facet" id="side-panel-<?= $this->escapeHtmlAttr($cluster['label']); ?>">
+          <div class='row' style='padding-top: 6px;'>
+<!--Begin of Facet title div-->
+            <?
+            /*
+             * @@TODO zde se bude volat script ktery innerHTML jak hlavicku fassety tak vsechny podfassety a jejich hieararchii
+             */
+            ?>
+
+            <?
+
+            ?>
+            <script>
+              createFacets(<? echo json_encode($cluster); ?>);
+            </script>
+
+            <div class="col-xs-12 list-group-item title<? if(in_array($title, $collapsedFacets)): ?> collapsed<? endif ?>" data-toggle="collapse" href="#side-collapse-<?=$this->escapeHtmlAttr($title) ?>" >
+              <i class="pr-institution-arrow" title="<?=$this->translate('Expand or collapse')?>"></i>
+              <!--<?= $this->help()->getElementHelp('Expand or collapse', "<i class='pr-institution-arrow'></i>") ?>-->
+              <? $titleHtml = $this->transEsc($cluster['label']); ?>
+              <?= $this->help()->getElementHelp('element_help_facet_' . $cluster['label'], $titleHtml) ?>
+              <? if (isset($rangeFacets[$title])): ?>
+                <? if ($rangeFacets[$title]['type'] == 'date'): ?>
+                  <button type="button" class="btn btn-default btn-sm<?=in_array($title, $this->recommend->getTimelineFacets())?'' : ' hidden'?>" id="showmodal"  ><?=$this->transEsc('Show timeline') ?></button>
+                  <?=$this->render("Recommend/SideFacets/TimelineModal.phtml")?>
+                <? endif; ?>
+              <? endif; ?>
+            </div>
+<!--End of Facet title div-->
+          </div>
+
+
+        </div>
+      <?
+      }
+    }
+  }
+  ?>
+
+</aside>
