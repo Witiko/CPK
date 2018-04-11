@@ -1,0 +1,117 @@
+<?
+/**
+ * Project: www.knihovny.cz
+ * User: Zdeněk Nováček (BlueEyedBoy)
+ * Email: znovacek1997@gmail.com
+ * Date: 10.4.18
+ */
+?>
+
+<?
+$results = $this->recommend->getResults();
+?>
+
+<aside>
+  <?
+  $extraFilters = isset($this->extraSideFacetFilters) ? $this->extraSideFacetFilters : array();
+
+  $queryParams = $results->getUrlQuery()->getParamArray();
+  unset($queryParams['filter']);
+
+  $i = '?';
+  $removeFilterUrl = '/Search/Results';
+  foreach ($queryParams as $key => $value) {
+    if (is_array($value)) {
+      $value = $value[0];
+      $key .= "[]";
+    }
+    $removeFilterUrl .= $i . $key . '=' . urlencode($value);
+
+    if ($i === '?') {
+      $i = '&';
+    }
+  }
+
+// get facets which show in LI or CI and libraries
+  $allFieldsSection = $this->recommend->getAllFieldsSection();
+  $librariesSection = $this->recommend->getLibrariesSection();
+  $resultsSettings = $this->recommend->getResultsSettings();
+  $openFacets = $this->recommend->getOpenFacets();
+  ?>
+<!-- hlavni nadpis facet hledani BEGIN -->
+  <? if ($results->getResultTotal() > 0): ?>
+    <h3 class='side-facets-header facets-questionmark-help'>
+      <?= $this->transEsc(isset($this->overrideSideFacetCaption) ? $this->overrideSideFacetCaption : 'Narrow Search') ?>
+      <?= ($this->librarySearch)? ('adr-facets') : ($filterClass)? $this->help()->getQuestionMarkHelp('ci-facets') : $this->help()->getQuestionMarkHelp('facets') ;?>
+    </h3>
+  <? endif; ?>
+<!-- hlavni nadpis facet hledani END -->
+
+  <? $filterList = array_merge($results->getParams()->getFilterList(true), $extraFilters); ?>
+<!-- vypis filtr BEGIN -->
+  <? if (!empty($filterList)): ?>
+  <div class="list-group filters">
+    <? foreach ($filterList as $field => $filters): ?>
+
+      <? foreach ($filters as $i => $filter): ?>
+
+        <?= $filter['displayText'].'<br>'; ?>
+
+      <? endforeach; ?>
+
+    <? endforeach; ?>
+    <div class='text-center'>
+      <a id='remove-all-filters-async' href='<?=$removeFilterUrl?>'><div class="btn btn-primary btn-sm"><?=$this->transEsc('Remove Filters')?></div></a>
+    </div>
+  </div>
+  <? endif; ?>
+<!-- vypis filtr END -->
+
+<!-- toto nevim co je BEGIN -->
+  <div class="checkboxFilter<?if($shown == 0):?> hidden<? endif; ?>">
+    <div id="side-panel-eds-filters">
+      <?=$html?>
+    </div>
+  </div>
+<!-- toto nevim co je END -->
+
+  <?= isset($this->sideFacetExtraControls) ? $this->sideFacetExtraControls : '' ?>
+  <?
+  /*
+   * @TODO tahat si ze solru jen data ktere potrebuji?? ne vsechny facety a pak je filtrovat ktery zobrazovat
+   */
+  $sideFacetSet = $this->recommend->getFacetSet();
+  $rangeFacets = $this->recommend->getAllRangeFacets();
+  ?>
+
+
+  <? if (!empty($sideFacetSet) && $results->getResultTotal() > 0) {
+    foreach ($sideFacetSet as $title => $cluster) {
+      if (in_array($cluster['label'],($this->layout()->headerType != "newlibraries")? $allFieldsSection : $librariesSection)) {
+        ?>
+        <div class="list-group facet" id="side-panel-<?= $this->escapeHtmlAttr($cluster['label']); ?>">
+          <?
+          if ($cluster['label'] == 'adv_search_year') {
+            include_once 'SideFacets/PublishDate.phtml';
+            echo '</div>';
+            continue;
+          }
+          ?>
+          <?
+          /**
+           * @TODO nekde mezi dostanim facet ze solru a postnutim do JS vyresit translate
+           */
+          ?>
+          <script>
+            createFacets(<? echo json_encode($cluster); ?>, <? echo json_encode($resultsSettings); ?>, <? echo json_encode($openFacets); ?>);
+          </script>
+        </div>
+        <hr>
+
+        <?
+      }
+    }
+  }
+  ?>
+
+</aside>

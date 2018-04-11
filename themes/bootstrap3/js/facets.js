@@ -1,14 +1,39 @@
-function createFacets(facets) {
-    //console.log(facets);
+function createFacets(facets, resultsSettings, openFacets) {
+    console.log(facets);
+    console.log(resultsSettings);
+    console.log(openFacets);
     var html = '';
     //console.log(facets.label);
-    html += '<b>'+facets.label+'</b><br>';
-    for (var i = 0; i < facets.list.length; i++) {
-        //console.log(i);
-        //var pokus = novy[i];
 
-        //console.log(facets.list[i].displayText);
-        html += facets.list[i].displayText+'<br>';
+    html += '<div class="col-xs-12 list-group-item title">';
+        html += '<i>';
+            html += '<span>';
+                html += facets.label;
+            html += '</span>';
+        html += '</i>';
+    html += '</div>';
+    //html += '<b>'+facets.label+'</b><br>';
+    var count;
+    if (facets.label === 'Institution')
+        if ((resultsSettings.institution === "-1"))
+            count = facets.list.length;
+        else if (resultsSettings.institution > "-1")
+            count = resultsSettings.institution;
+        else
+            count = resultsSettings.or;
+    else if (facets.list[0].operator === "OR")
+        count = resultsSettings.or;
+    else
+        count = resultsSettings.and;
+
+    if (openFacets.indexOf(facets.label) >= 0) {
+        for (var i = 0; i < count; i++) {
+            //console.log(i);
+            //var pokus = novy[i];
+
+            //console.log(facets.list[i].displayText);
+            html += facets.list[i].displayText + '<br>';
+        }
     }
     document.getElementById("side-panel-"+facets.label).innerHTML = html;
 }

@@ -63,6 +63,10 @@ class SideFacets extends SideFacetsBase
 
     protected $librariesSection = [];
 
+    protected $resultsSettings = [];
+
+    protected $open = [];
+
     /**
      * Store the configuration of the recommendation module.
      *
@@ -163,6 +167,16 @@ class SideFacets extends SideFacetsBase
                 = $config->SpecialFacets->librariesSection->toArray();
         }
 
+        if (isset($config->Results_Settings->count)) {
+            $this->resultsSettings
+                = $config->Results_Settings->count->toArray();
+        }
+
+        if (isset($config->Results_Settings->open)) {
+            $this->open
+                = $config->Results_Settings->open->toArray();
+        }
+
     }
 
     /**
@@ -228,6 +242,16 @@ class SideFacets extends SideFacetsBase
     public function getLibrariesSection()
     {
         return $this->librariesSection;
+    }
+
+    public function getResultsSettings()
+    {
+        return $this->resultsSettings;
+    }
+
+    public function getOpenFacets()
+    {
+        return $this->open;
     }
 
 }
