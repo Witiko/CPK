@@ -1095,8 +1095,8 @@ class MyResearchController extends MyResearchControllerBase
 
         $viewVars['selectedCitationStyle']   = $selectedCitationStyle;
         $viewVars['availableCitationStyles'] = $availableCitationStyles;
-        $viewVars['institutions']            = $this->getInstitutions(true);
-        $viewVars['preferredInstitutions']   = array_filter(explode(";", $userSettingsTable->getSavedInstitutions($user)));
+        $viewVars['institutions']            = $this->getInstitutions($user, true);
+        $viewVars['preferredInstitutions']   = array_filter($userSettingsTable->getSavedInstitutions($user));
 
         /* Records per page fieldset */
         $searchesConfig = $this->getConfig('searches');
@@ -1248,11 +1248,12 @@ class MyResearchController extends MyResearchControllerBase
     /*
      * Get institutions from Solr
      *
+     * @param \CPK\Db\Row\User
      * @param bool $withoutUserSavedInstitution
      *
      * @return array
      */
-    public function getInstitutions($withoutUserSavedInstitution = false)
+    public function getInstitutions(\CPK\Db\Row\User $user, $withoutUserSavedInstitution = false)
     {
         $results = $this->getServiceLocator()->get('VuFind\SearchResultsPluginManager')->get('Solr');
         $params = $results->getParams();
@@ -1269,22 +1270,12 @@ class MyResearchController extends MyResearchControllerBase
         }
 
         if ($withoutUserSavedInstitution) {
-            // Stop now if the user does not have valid catalog credentials available:
-            if (! $user = $this->getAuthManager()->isLoggedIn()) {
-                $this->flashExceptions($this->flashMessenger());
-                return $this->forceLogin();
-            }
-
-            $savedInstitutions = explode(";",
-                $this->getTable("usersettings")->getSavedInstitutions($user)
-            );
+            $savedInstitutions = $this->getTable("usersettings")->getSavedInstitutions($user);
 
             if (! empty($savedInstitutions)) {
-                foreach ($savedInstitutions as $institution) {
-                    foreach ($facets as $key => $facet) {
-                        if ($institution == $facet['value']) {
-                            unset($facets[$key]);
-                        }
+                foreach ($facets as $key => $facet) {
+                    if (in_array($facet['value'], $savedInstitutions)) {
+                        unset($facets[$key]);
                     }
                 }
             }
