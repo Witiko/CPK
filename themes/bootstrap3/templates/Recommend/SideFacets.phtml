@@ -559,6 +559,8 @@ $(document).off("click", ".jstree-anchor").on("click", ".jstree-anchor", functio
                 }
             } else {
                 if ($key == 'type') { $key = 'type0[]'; }
+                if ($key == 'lookfor') { $key = 'lookfor0[]'; }
+                if ($key == 'bool') { $key = 'bool0[]'; }
                 $parts[] = urlencode($key) . '=' . urlencode($value);
             }
         }

@@ -50,7 +50,7 @@ function buildFacetNodes(data, currentPath, allowExclude, excludeTitle, counts)
                 html += "";
             }
             else {
-                html += " facet-filter";
+                html += " facet-filter-span";
             }
         }
     }

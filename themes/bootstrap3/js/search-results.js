@@ -1102,13 +1102,13 @@ jQuery( document ).ready( function( $ ) {
 	/*
 	 * Add or remove clicked facet
 	 */
-	$( 'body' ).on( 'click', '.facet-filter-ebsco', function( event ) {
+	$( 'body' ).on( 'click', '.facet-filter', function( event ) {
 		event.preventDefault();
 		
 		if ( event.ctrlKey ){
 		     window.open( $( this ).attr( 'href' ), '_blank' );
             $( this ).removeClass( 'jstree-clicked active' );
-		     return false;
+            return false;
 		}
 		
 		$( "input[name='page']" ).val( '1' );
