@@ -334,6 +334,7 @@ AllFields:
     - country_search_txt_mv
     - language_search_txt_mv
     - format_search_txt_mv
+    - people_search_txt_mv^650
   DismaxParams:
     - [bq, "inspiration:top_results^1"]
     - [bf, "if(exists(merged_records_boolean),10000,0)" ]
@@ -411,8 +412,8 @@ AllFields:
       - [onephrase, ~]
     ean_isn_mv:
       - [onephrase, ~]
-    upv_ipc_search:
-      - [onephrase, ~]
+    people_search_txt_mv:
+      - [and, 650]
   FilterQuery: "NOT recordtype:library AND NOT recordtype:sfx"
 #  ExactSettings:
 #    DismaxFields:
@@ -684,6 +685,7 @@ Libraries:
     - branch_search_txt_mv
     - sigla_search_txt
     - cpk_code_search_txt
+    - ils_search_txt
   FilterQuery: "recordtype:library"
   DismaxParams:
     - [bf, ord(library_relevance_str)^9999]
