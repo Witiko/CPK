@@ -96,20 +96,21 @@ $results = $this->recommend->getResults();
     foreach ($sideFacetSet as $title => $cluster) {
       if (in_array($cluster['label'],($this->layout()->headerType != "newlibraries")? $allFieldsSection : $librariesSection)) {
   ?>
-        <div class="list-group facet" id="side-panel-<?= $this->escapeHtmlAttr($cluster['label']); ?>">
+        <div class="col-xs-12 list-group" id="side-panel-<?= $this->escapeHtmlAttr($cluster['label']); ?>">
+
           <?
-          if (($cluster['label'] == 'adv_search_year') && (in_array($cluster['label'], $openFacets))) {
-          ?>
-          <div class="col-xs-12 list-group-item title"><i><span><?= $cluster['label'] ?></span></i></div>
-          <?
+          // @TODO prozatim schovano aby mi to nedelalo bordel jelikoz to je uplne jiny typ vytvareni facet
+           /*if (($cluster['label'] == 'adv_search_year') && (in_array($cluster['label'], $openFacets))) {
+            // @TODO prepsat casovou osu do JS??? nebo si to rozhodit a cast facet genervat v PHP a jinou v JS???
             include_once 'SideFacets/PublishDate.phtml';
             echo '</div>';
             continue;
-          }
+          }*/
           ?>
+
           <?
           /**
-           * @TODO nekde mezi dostanim facet ze solru a postnutim do JS vyresit translate
+           * @TODO translate resit az v js... vim ze nejak to jde akorat jeste nevim jak presne
            */
           ?>
           <script>

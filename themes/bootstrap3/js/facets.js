@@ -4,16 +4,8 @@ function createFacets(facets, resultsSettings, openFacets, numberFacets) {
     console.log(openFacets);
     console.log(numberFacets);
     var html = '';
-    //console.log(facets.label);
-
-    html += '<div class="col-xs-12 list-group-item title">';
-        html += '<i>';
-            html += '<span>';
-                html += facets.label;
-            html += '</span>';
-        html += '</i>';
-    html += '</div>';
-    //html += '<b>'+facets.label+'</b><br>';
+//<li class="col-xs-12 list-group-item title"><span><?= $cluster['label'] ?></span></li>
+    html += '<li class="list-group-item title">'+facets.label+'</li>';
     var count;
     if (facets.label === 'Institution')
         if ((resultsSettings.institution === "-1"))
@@ -27,11 +19,11 @@ function createFacets(facets, resultsSettings, openFacets, numberFacets) {
 
     if (openFacets.indexOf(facets.label) >= 0) {
         for (var i = 0; i < count; i++) {
-            html += facets.list[i].displayText;
+            html += '<li class="list-group-item">'+facets.list[i].displayText;
             if (numberFacets.indexOf(facets.label) >= 0) {
                 html += facets.list[i].count;
             }
-            html += '<br>';
+            html += '</li>';
         }
     }
     document.getElementById("side-panel-"+facets.label).innerHTML = html;
