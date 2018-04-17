@@ -1,0 +1,13 @@
+.title {
+    &.open {
+        border-radius: @border-radius-base;
+        &:before {content: '\25BC';}
+    }
+    &:after {
+        content: none !important;
+    }
+    &:before {
+        content: '\25B2';
+        float: left;
+    }
+}

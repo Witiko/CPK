@@ -46,13 +46,6 @@ class SideFacets extends SideFacetsBase
     protected $institutionsMappings = [];
 
     /**
-     * Checkbox facet configuration
-     *
-     * @var array
-     */
-    protected $ajaxFacets = [];
-
-    /**
      * Facets with timeline
      *
      * @var array
@@ -114,40 +107,6 @@ class SideFacets extends SideFacetsBase
                 = $config->SpecialFacets->numericRange->toArray();
         }
 
-        // Checkbox facets:
-        if (substr($checkboxSection, 0, 1) == '~') {
-            $checkboxSection = substr($checkboxSection, 1);
-            $flipCheckboxes = true;
-        }
-        $this->checkboxFacets
-            = ($checkboxSection && isset($config->$checkboxSection))
-            ? $config->$checkboxSection->toArray() : [];
-        if (isset($flipCheckboxes) && $flipCheckboxes) {
-            $this->checkboxFacets = array_flip($this->checkboxFacets);
-        }
-
-        // Collapsed facets:
-        if (isset($config->Results_Settings->collapsedFacets)) {
-            $this->collapsedFacets = $config->Results_Settings->collapsedFacets;
-        }
-
-        // Hierarchical facets:
-        if (isset($config->SpecialFacets->hierarchical)) {
-            $this->hierarchicalFacets
-                = $config->SpecialFacets->hierarchical->toArray();
-        }
-
-        // Hierarchical facet sort options:
-        if (isset($config->SpecialFacets->hierarchicalFacetSortOptions)) {
-            $this->hierarchicalFacetSortOptions
-                = $config->SpecialFacets->hierarchicalFacetSortOptions->toArray();
-        }
-        // End of version from module VuFind
-
-        if (isset($config->SpecialFacets->ajax)) {
-            $this->ajaxFacets = $config->SpecialFacets->ajax->toArray();
-        }
-
         if (isset($config->InstitutionsMappings)) {
             $this->institutionsMappings = $config->InstitutionsMappings->toArray();
         }
@@ -201,9 +160,9 @@ class SideFacets extends SideFacetsBase
     {
         // Turn on side facets in the search results:
         foreach ($this->mainFacets as $name => $desc) {
-            if (!in_array($name, $this->ajaxFacets)) {
+            //if (!in_array($name, $this->ajaxFacets)) {
                 $params->addFacet($name, $desc, in_array($name, $this->orFacets));
-            }
+            //}
         }
         foreach ($this->checkboxFacets as $name => $desc) {
             $params->addCheckboxFacet($name, $desc);

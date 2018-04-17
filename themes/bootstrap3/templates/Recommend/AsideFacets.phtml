@@ -10,6 +10,7 @@
 
 <?
 // @TODO ve facets.ini je jak konfigurace pro PHP tak JS... něco pro PHP je zbytečný nebo by šlo udělat jinak... kouknout na to
+// @TODO ve facets.ini je nastevni OR facet v retezci predelat do pole
 ?>
 
 
@@ -17,7 +18,7 @@
 $results = $this->recommend->getResults();
 ?>
 
-<aside>
+
   <?
   $extraFilters = isset($this->extraSideFacetFilters) ? $this->extraSideFacetFilters : array();
 
@@ -96,7 +97,7 @@ $results = $this->recommend->getResults();
     foreach ($sideFacetSet as $title => $cluster) {
       if (in_array($cluster['label'],($this->layout()->headerType != "newlibraries")? $allFieldsSection : $librariesSection)) {
   ?>
-        <div class="col-xs-12 list-group" id="side-panel-<?= $this->escapeHtmlAttr($cluster['label']); ?>">
+        <div class="col-xs-12 list-group" id="side-panel-<?= $cluster['label']; ?>">
 
           <?
           // @TODO prozatim schovano aby mi to nedelalo bordel jelikoz to je uplne jiny typ vytvareni facet
@@ -110,13 +111,13 @@ $results = $this->recommend->getResults();
 
           <?
           /**
-           * @TODO translate resit az v js... vim ze nejak to jde akorat jeste nevim jak presne
+           * @TODO translate resit az v js... vim ze nejak to jde akorat jeste nevim jak presne, pro pubishDate je to nejaky zamotany
            */
           ?>
           <script>
             createFacets(<? echo json_encode($cluster); ?>, <? echo json_encode($resultsSettings); ?>, <? echo json_encode($openFacets); ?>, <? echo json_encode($numberFacets); ?>);
           </script>
-        </div>
+          </div>
         <? if ($i == count($cluster) - 1): ?>
         <hr>
         <? endif; ?>
@@ -127,4 +128,3 @@ $results = $this->recommend->getResults();
   }
   ?>
 
-</aside>
