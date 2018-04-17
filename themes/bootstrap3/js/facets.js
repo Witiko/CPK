@@ -1,7 +1,8 @@
-function createFacets(facets, resultsSettings, openFacets) {
+function createFacets(facets, resultsSettings, openFacets, numberFacets) {
     console.log(facets);
     console.log(resultsSettings);
     console.log(openFacets);
+    console.log(numberFacets);
     var html = '';
     //console.log(facets.label);
 
@@ -20,19 +21,17 @@ function createFacets(facets, resultsSettings, openFacets) {
         else if (resultsSettings.institution > "-1")
             count = resultsSettings.institution;
         else
-            count = resultsSettings.or;
-    else if (facets.list[0].operator === "OR")
-        count = resultsSettings.or;
+            count = resultsSettings.default;
     else
-        count = resultsSettings.and;
+        count = resultsSettings.default;
 
     if (openFacets.indexOf(facets.label) >= 0) {
         for (var i = 0; i < count; i++) {
-            //console.log(i);
-            //var pokus = novy[i];
-
-            //console.log(facets.list[i].displayText);
-            html += facets.list[i].displayText + '<br>';
+            html += facets.list[i].displayText;
+            if (numberFacets.indexOf(facets.label) >= 0) {
+                html += facets.list[i].count;
+            }
+            html += '<br>';
         }
     }
     document.getElementById("side-panel-"+facets.label).innerHTML = html;

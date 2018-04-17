@@ -7,6 +7,12 @@
  */
 ?>
 
+
+<?
+// @TODO ve facets.ini je jak konfigurace pro PHP tak JS... něco pro PHP je zbytečný nebo by šlo udělat jinak... kouknout na to
+?>
+
+
 <?
 $results = $this->recommend->getResults();
 ?>
@@ -37,6 +43,7 @@ $results = $this->recommend->getResults();
   $librariesSection = $this->recommend->getLibrariesSection();
   $resultsSettings = $this->recommend->getResultsSettings();
   $openFacets = $this->recommend->getOpenFacets();
+  $numberFacets = $this->recommend->getNumberFacets();
   ?>
 <!-- hlavni nadpis facet hledani BEGIN -->
   <? if ($results->getResultTotal() > 0): ?>
@@ -88,10 +95,13 @@ $results = $this->recommend->getResults();
   <? if (!empty($sideFacetSet) && $results->getResultTotal() > 0) {
     foreach ($sideFacetSet as $title => $cluster) {
       if (in_array($cluster['label'],($this->layout()->headerType != "newlibraries")? $allFieldsSection : $librariesSection)) {
-        ?>
+  ?>
         <div class="list-group facet" id="side-panel-<?= $this->escapeHtmlAttr($cluster['label']); ?>">
           <?
-          if ($cluster['label'] == 'adv_search_year') {
+          if (($cluster['label'] == 'adv_search_year') && (in_array($cluster['label'], $openFacets))) {
+          ?>
+          <div class="col-xs-12 list-group-item title"><i><span><?= $cluster['label'] ?></span></i></div>
+          <?
             include_once 'SideFacets/PublishDate.phtml';
             echo '</div>';
             continue;
@@ -103,12 +113,14 @@ $results = $this->recommend->getResults();
            */
           ?>
           <script>
-            createFacets(<? echo json_encode($cluster); ?>, <? echo json_encode($resultsSettings); ?>, <? echo json_encode($openFacets); ?>);
+            createFacets(<? echo json_encode($cluster); ?>, <? echo json_encode($resultsSettings); ?>, <? echo json_encode($openFacets); ?>, <? echo json_encode($numberFacets); ?>);
           </script>
         </div>
+        <? if ($i == count($cluster) - 1): ?>
         <hr>
+        <? endif; ?>
 
-        <?
+  <?
       }
     }
   }
