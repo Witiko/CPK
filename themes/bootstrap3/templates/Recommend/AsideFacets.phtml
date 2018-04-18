@@ -115,8 +115,26 @@ $results = $this->recommend->getResults();
            */
           ?>
           <script>
+              /**
+               * @TODO vytvaret facety po jednotlivych urovnich vnoreni pote bude take mozno napr omezit kolik urovni se ma vypisovat
+               */
             createFacets(<? echo json_encode($cluster); ?>, <? echo json_encode($resultsSettings); ?>, <? echo json_encode($openFacets); ?>, <? echo json_encode($numberFacets); ?>);
+
           </script>
+          <?
+          /**
+          * @TODO dokud najde v danem labelu ve value cislo jine nez 1 delej createHierarchy... nejdrv vsach ykontrolovat 1 pak 2 pak 3 jezstli se tam nenachazi
+          */
+          $l=1;
+          while ($l<=$resultsSettings['deep']) {
+          ?>
+            <script>
+              createHierarchy(<? echo json_encode($cluster); ?>, <? echo json_encode($resultsSettings); ?>, <?= $l?>)
+            </script>
+          <?
+            $l++;
+          }
+          ?>
           </div>
         <? if ($i == count($cluster) - 1): ?>
         <hr>

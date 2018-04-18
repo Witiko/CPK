@@ -5,6 +5,17 @@ function createFacets(facets, resultsSettings, openFacets, numberFacets) {
      */
 
 
+    /**
+     * odkaz pres prave tlacitko udelam tak e po kliknuti pravim tlacitkem na li se vzgeneruje odkaz ktery "prekryje" dany li element
+     */
+
+    /**
+     * pri klasickem kliknuti na facetu se vyvola lisener ktery bude vedet od ktere facety to vzeslo a na zaklade toho udela url a posle searchovi...ten nasledne pouze obnovi result
+     * paralerne s tim se pomoci js zaklikne dana faceta a behem vyhledavani se facety zakazi aspon na klik... nebo si muze pamatovat na co bylo kliknuto
+     * ale az po nacteni resultu se bude moct toto kliknuti behem zakazanych facet vyvola z duvodu ze nevime zda jestli vubec diky predeslemu vyhledavani bude mozne na tuto facetu kliknout
+     */
+
+
     console.log(facets);
     //console.log(resultsSettings);
     //console.log(openFacets);
@@ -30,18 +41,18 @@ function createFacets(facets, resultsSettings, openFacets, numberFacets) {
          * @TODO conspectus maji spatne tooltiptext a dispay text... maji to stejny jako value... PROOOC?!?!? stejne tak nektery instituce!!!! checknout kde se to kurvi
          */
         if (facets.list[i].operator === 'OR') {
-            if (parseInt(facets.list[i].value[0]) >= 0) {
-                if (facets.list[i].value[0] === '0') {
-                    html += '<li class="list-group-item">' + facets.list[i].displayText;
+            if (parseInt(facets.list[i].value[0]) >= 0) { // jen facety co maji cislo
+                if (facets.list[i].value[0] === '0') { // jen facety co jsou na nulty urovni
+                    //console.log('< id="facet-'+facets.list[i].value+'">');
+                    var splitter = facets.list[i].value.split('/');
+                    splitter.splice(-1,1);
+                    var insert = splitter.join('-');
+                    //console.log('< id="facet-'+insert+'">');
+                    html += '<li class="list-group-item" id="facet-'+insert+'">' + facets.list[i].displayText;
                     if (numberFacets.indexOf(facets.label) >= 0) {
                         html += facets.list[i].count;
                     }
                     html += '</li>';
-                } else {
-                    /**
-                     * @TODO vyresit aby se vnorene facety vlozily pod spravnu nadrazenou facetu
-                     */
-                    html += createHierarchy(facets.list[i]);
                 }
             } else {
                 html += '<li class="list-group-item">' + facets.list[i].displayText;
@@ -59,20 +70,97 @@ function createFacets(facets, resultsSettings, openFacets, numberFacets) {
         }
     }
     html += '</ul>';
-    if (openFacets.indexOf(facets.label) >= 0) {
+    /*if (openFacets.indexOf(facets.label) >= 0) {
         document.getElementById("side-panel-"+facets.label).classList.add('open')
-    }
+    }*/
 
         document.getElementById("side-panel-"+facets.label).innerHTML = html;
+    return pocet;
 }
 
 
-function createHierarchy(facets){
+/**
+ * hierarchie bude fungovat tak ze najde prvi element s xtou urvni a pote se spusti funkce ktera najde a posklada vsechnz lementy s touto urovni a stejnou value
+ * a nasledne innertne do html k danemu id value...pote pujde dal a najde zase stejnou uroven ale jiny value a opet najde vsechny se stejnou id i vaue a inertne
+ * cela tato procedura se bude spoustet z php kde ovlivnim kterou uroven hledam
+ */
+
+function createHierarchy(facets, resultsSettings, deep) {
     var htmlUnder = '';
-    htmlUnder += '<ul>';
-    htmlUnder += '<li class="list-group-item">'+facets.displayText+'</li>';
-    htmlUnder += '</ul>';
-    return htmlUnder;
+    var something = false;
+    var splitter;
+    var parent;
+    var facet;
+    var first;
+    var facetSection;
+    var delka;
+    var used = new Array();
+    var pokus = 0;
+
+    var numOfTrue = 0;
+    for(var i=0;i<facets.list.length;i++){
+        if(parseInt(facets.list[i].value[0]) === deep)
+            numOfTrue++;
+    }
+    console.log(numOfTrue);
+    while (pokus < numOfTrue) {
+        first = true;
+        htmlUnder = '';
+        htmlUnder += '<ul>';
+        for (var i = 0; i < facets.list.length; i++) {
+            if (facets.list[i].operator === 'OR') {
+                splitter = facets.list[i].value.split('/');
+                splitter.splice(-1, 1);
+                if (parseInt(splitter[0]) > 0) { // jen facety co maji cislo
+                    //console.log(splitter);
+                    //console.log(parseInt(splitter[0]) -1);
+                    //console.log(splitter.length - 2);
+                    delka = splitter.length - 2;
+                    //console.log(splitter[delka]);
+                    //console.log(facetSection);
+                    if ((parseInt(splitter[0]) === deep) && ((splitter[delka] === facetSection) || (first))) {
+                        //console.log(splitter);
+                        facet = "facet-" + splitter.join('-');
+                        //console.log(facet);
+                        //console.log(facetSection);
+                        //console.log(facets.list[i].displayText);
+                        //htmlUnder += '</ul>';
+                        var level = parseInt(splitter[0]) - 1;
+                        splitter[0] = level.toString();
+                        //console.log('||||');
+                        //splitter.splice(-1, 1);
+                        splitter.splice(-1, 1);
+                        parent = "facet-" + splitter.join('-');
+                        //parent = parent.substr(1);
+                        //console.log(parent);
+                        if (first) {
+                            //console.log(used.indexOf(splitter[splitter.length - 1]));
+                            if (used.indexOf(splitter[splitter.length - 1]) === -1) {
+                                //console.log('==========');
+                                used.push(splitter[splitter.length - 1]);
+                                htmlUnder += '<li class="list-group-item" id="' + facet + '">' + facets.list[i].displayText + '</li>';
+
+                                facetSection = splitter[splitter.length - 1];
+                                first = false;
+                            }
+                        } else {
+                            htmlUnder += '<li class="list-group-item" id="' + facet + '">' + facets.list[i].displayText + '</li>';
+
+                        }
+                        something = true;
+                        //console.log('===========');
+                    }
+                }
+            }
+        }
+        htmlUnder += '</ul>';
+        if (first === false) {
+            console.log(parent);
+            var old = document.getElementById(parent).outerHTML;
+            document.getElementById(parent).innerHTML = old + htmlUnder;
+        }
+        pokus++;
+    }
 }
 
 
