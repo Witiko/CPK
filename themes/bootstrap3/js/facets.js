@@ -16,6 +16,12 @@ function createFacets(facets, resultsSettings, openFacets, numberFacets) {
      */
 
 
+    /**
+     * vygenerovat vsechny nacteny facety ale pak urcit kolik jich zobrazit + ktery nechat otevreny defaultne
+     */
+
+
+
     console.log(facets);
     //console.log(resultsSettings);
     //console.log(openFacets);
@@ -24,8 +30,8 @@ function createFacets(facets, resultsSettings, openFacets, numberFacets) {
 //<div class="col-xs-12 list-group" id="side-panel-<?= $this->escapeHtmlAttr($cluster['label']); ?>">
 
     html += '<li class="list-group-item title">'+facets.label+'</li>';
-    var count;
-    if (facets.label === 'Institution')
+    var count = facets.list.length;
+    /*if (facets.label === 'Institution')
         if ((resultsSettings.institution === "-1"))
             count = facets.list.length;
         else if (resultsSettings.institution > "-1")
@@ -33,7 +39,7 @@ function createFacets(facets, resultsSettings, openFacets, numberFacets) {
         else
             count = resultsSettings.default;
     else
-        count = resultsSettings.default;
+        count = resultsSettings.default;*/
 
     html += '<ul>';
     for (var i = 0; i < count; i++) {
@@ -75,7 +81,6 @@ function createFacets(facets, resultsSettings, openFacets, numberFacets) {
     }*/
 
         document.getElementById("side-panel-"+facets.label).innerHTML = html;
-    return pocet;
 }
 
 
@@ -85,9 +90,18 @@ function createFacets(facets, resultsSettings, openFacets, numberFacets) {
  * cela tato procedura se bude spoustet z php kde ovlivnim kterou uroven hledam
  */
 
+
+/**
+ * pokud vytvarejici faceta ma nejakyh potomka tak ji nedavat li ale ul
+ *
+ *  <ul class="list-group-item" id="facet-1-Library-brno">Brno
+ *    <li class="list-group-item" id="facet-2-Library-brno-MZK">Moravská zemská knihovna</li>
+ *  </ul>
+ *
+ */
+
 function createHierarchy(facets, resultsSettings, deep) {
     var htmlUnder = '';
-    var something = false;
     var splitter;
     var parent;
     var facet;
@@ -102,61 +116,43 @@ function createHierarchy(facets, resultsSettings, deep) {
         if(parseInt(facets.list[i].value[0]) === deep)
             numOfTrue++;
     }
-    console.log(numOfTrue);
     while (pokus < numOfTrue) {
         first = true;
         htmlUnder = '';
         htmlUnder += '<ul>';
-        for (var i = 0; i < facets.list.length; i++) {
-            if (facets.list[i].operator === 'OR') {
-                splitter = facets.list[i].value.split('/');
-                splitter.splice(-1, 1);
-                if (parseInt(splitter[0]) > 0) { // jen facety co maji cislo
-                    //console.log(splitter);
-                    //console.log(parseInt(splitter[0]) -1);
-                    //console.log(splitter.length - 2);
-                    delka = splitter.length - 2;
-                    //console.log(splitter[delka]);
-                    //console.log(facetSection);
-                    if ((parseInt(splitter[0]) === deep) && ((splitter[delka] === facetSection) || (first))) {
-                        //console.log(splitter);
-                        facet = "facet-" + splitter.join('-');
-                        //console.log(facet);
-                        //console.log(facetSection);
-                        //console.log(facets.list[i].displayText);
-                        //htmlUnder += '</ul>';
-                        var level = parseInt(splitter[0]) - 1;
-                        splitter[0] = level.toString();
-                        //console.log('||||');
-                        //splitter.splice(-1, 1);
-                        splitter.splice(-1, 1);
-                        parent = "facet-" + splitter.join('-');
-                        //parent = parent.substr(1);
-                        //console.log(parent);
-                        if (first) {
-                            //console.log(used.indexOf(splitter[splitter.length - 1]));
-                            if (used.indexOf(splitter[splitter.length - 1]) === -1) {
-                                //console.log('==========');
-                                used.push(splitter[splitter.length - 1]);
+        if (facets.list[pokus].operator === 'OR') {
+            for (var i = 0; i < facets.list.length; i++) {
+                if ((facets.list[i].value !== facets.list[i].displayText) || (facets.label === "Conspectus")) {
+                    splitter = facets.list[i].value.split('/');
+                    splitter.splice(-1, 1);
+                    if (parseInt(splitter[0]) > 0) { // jen facety co maji cislo
+                        delka = splitter.length - 2;
+                        if ((parseInt(splitter[0]) === deep) && ((splitter[delka] === facetSection) || (first))) {
+                            facet = "facet-" + splitter.join('-');
+                            var level = parseInt(splitter[0]) - 1;
+                            splitter[0] = level.toString();
+                            splitter.splice(-1, 1);
+                            parent = "facet-" + splitter.join('-');
+                            if (first) {
+                                if (used.indexOf(splitter[splitter.length - 1]) === -1) {
+                                    used.push(splitter[splitter.length - 1]);
+                                    htmlUnder += '<li class="list-group-item" id="' + facet + '">' + facets.list[i].displayText + '</li>';
+
+                                    facetSection = splitter[splitter.length - 1];
+                                    first = false;
+                                }
+                            } else {
                                 htmlUnder += '<li class="list-group-item" id="' + facet + '">' + facets.list[i].displayText + '</li>';
 
-                                facetSection = splitter[splitter.length - 1];
-                                first = false;
                             }
-                        } else {
-                            htmlUnder += '<li class="list-group-item" id="' + facet + '">' + facets.list[i].displayText + '</li>';
-
                         }
-                        something = true;
-                        //console.log('===========');
                     }
                 }
             }
         }
         htmlUnder += '</ul>';
         if (first === false) {
-            console.log(parent);
-            var old = document.getElementById(parent).outerHTML;
+            var old = document.getElementById(parent).innerHTML;
             document.getElementById(parent).innerHTML = old + htmlUnder;
         }
         pokus++;
