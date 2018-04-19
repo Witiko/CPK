@@ -44,7 +44,7 @@ function createFacets(facets, resultsSettings, openFacets, numberFacets) {
     html += '<ul>';
     for (var i = 0; i < count; i++) {
         /**
-         * @TODO conspectus maji spatne tooltiptext a dispay text... maji to stejny jako value... PROOOC?!?!? stejne tak nektery instituce!!!! checknout kde se to kurvi
+         * @TODO conspectus maji spatne tooltiptext a dispay text... maji to stejny jako value... PROOOC?!?!?
          */
         if (facets.list[i].operator === 'OR') {
             if (parseInt(facets.list[i].value[0]) >= 0) { // jen facety co maji cislo
@@ -100,7 +100,7 @@ function createFacets(facets, resultsSettings, openFacets, numberFacets) {
  *
  */
 
-function createHierarchy(facets, resultsSettings, deep) {
+function reateHierarchy(facets, resultsSettings, deep) {
     var htmlUnder = '';
     var splitter;
     var parent;
@@ -119,16 +119,19 @@ function createHierarchy(facets, resultsSettings, deep) {
     while (pokus < numOfTrue) {
         first = true;
         htmlUnder = '';
+        htmlUnder += '<li class="list-group-item title">'+facets.label+'</li>';
         htmlUnder += '<ul>';
-        if (facets.list[pokus].operator === 'OR') {
-            for (var i = 0; i < facets.list.length; i++) {
-                if ((facets.list[i].value !== facets.list[i].displayText) || (facets.label === "Conspectus")) {
-                    splitter = facets.list[i].value.split('/');
-                    splitter.splice(-1, 1);
-                    if (parseInt(splitter[0]) > 0) { // jen facety co maji cislo
+        parent = "side-panel-"+facets.label;
+        for (var i = 0; i < facets.list.length; i++) {
+            if (facets.list[pokus].operator === 'OR') {
+                splitter = facets.list[i].value.split('/');
+                splitter.splice(-1, 1);
+                if (parseInt(splitter[0]) >= 0) { // jen facety co maji cislo
+                    if ((facets.list[i].value !== facets.list[i].displayText) || (facets.label === "Conspectus")) {
                         delka = splitter.length - 2;
                         if ((parseInt(splitter[0]) === deep) && ((splitter[delka] === facetSection) || (first))) {
                             facet = "facet-" + splitter.join('-');
+                            console.log('asdasd');
                             var level = parseInt(splitter[0]) - 1;
                             splitter[0] = level.toString();
                             splitter.splice(-1, 1);
@@ -147,16 +150,134 @@ function createHierarchy(facets, resultsSettings, deep) {
                             }
                         }
                     }
+                } else {
+                    htmlUnder += '<li class="list-group-item">' + facets.list[i].displayText;
+                    if (numberFacets.indexOf(facets.label) >= 0) {
+                        htmlUnder += facets.list[i].count;
+                    }
+                    htmlUnder += '</li>';
                 }
+            } else {
+                splitter = facets.list[i].value.split('/');
+                splitter.splice(-1, 1);
+                facet = "facet-" + splitter.join('-');
+                var level = parseInt(splitter[0]) - 1;
+                splitter[0] = level.toString();
+                splitter.splice(-1, 1);
+                parent = "facet-" + splitter.join('-');
+
+                htmlUnder += '<li class="list-group-item" id="' + facet + '">' + facets.list[i].displayText;
+                if (numberFacets.indexOf(facets.label) >= 0) {
+                    htmlUnder += facets.list[i].count;
+                }
+                htmlUnder += '</li>';
             }
         }
         htmlUnder += '</ul>';
-        if (first === false) {
+        if (first === false || deep === 0) {
             var old = document.getElementById(parent).innerHTML;
+            console.log(parent);
             document.getElementById(parent).innerHTML = old + htmlUnder;
         }
         pokus++;
     }
+}
+
+
+
+
+
+
+function generateFacets(facets, label, deep) {
+    console.log(facets);
+    var html = '';
+    html += '<li class="list-group-item title">'+label+'</li>';
+    html += '<ul id="facet-'+label+'">';
+    toHTML(html, 'side-panel-'+label);
+    html = '';
+    for (var i = 0; i < facets.length; i++) {
+        if ((facets[i].operator === 'OR') && (parseInt(facets[i].value[0]) >= 0)) { // OR facet hierarchical
+            if (parseInt(facets[i].value[0]) === 0) { // prvni uroven urcite nema rodice... nepocitame-li nadfacetovou uroven
+                html += '<li class="list-group-item"  style="color: blue">'+facets[i].displayText+'</li>';
+                toHTML(html, 'facet-'+label);
+                html = '';
+            } else { // urcite bude mit nejakeho rodice
+
+                //createHierarchy(facets, facets[i].value);
+
+                /*if (checkChildren(facets, facets[i].displayText, deep + 1)) {
+                    html += '<li class="list-group-item">'+displayText+'</li>';
+                } else {
+                    console.log('nema');
+                }*/
+            }
+        } else if (facets[i].operator === 'OR') { // OR facets non-hierarchical
+            html += '<li class="list-group-item" style="color: red">'+facets[i].displayText+'</li>';
+            toHTML(html, 'facet-'+label);
+            html = '';
+        } else { // AND facets
+            html += '<li class="list-group-item">'+facets[i].displayText+'</li>';
+            toHTML(html, 'facet-'+label);
+            html = '';
+        }
+    }
+    html += '</ul>';
+    toHTML(html, 'side-panel-'+label);
+}
+
+function createHierarchy(facets, facet, deep) {
+    checkParent(facets, facet , deep-1)
+}
+
+function checkParent(facets, searchFacet, parentDeep) {
+    var value;
+    for (var i = 0; i < facets.length; i++) {
+        value = facets[i].value.split('/');
+        value.splice(-1, 1);
+        if ((facetLevel(value) === parentDeep) && (facetSection(value) === searchFacet)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function checkChildren(facets, searchFacet, childrenDeep) {
+    var value;
+    for (var i = 0; i < facets.length; i++) {
+        value = facets[i].value.split('/');
+        value.splice(-1, 1);
+        if ((facetLevel(value) === childrenDeep) && (facetSection(value) === searchFacet)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function facetLevel(facetValue) {
+    return facetValue[0];
+}
+
+function facetSection(facetValue) {
+    return facetValue[facetValue.length - 2];
+}
+
+function createClass(facetValue) {
+    var facetClass = cutter(facetValue);
+    facetClass.splice(-1,1);
+    facetClass = facetClass.join('-');
+    return facetClass;
+}
+
+function cutter(facetValue) {
+    return facetValue.split('/');
+}
+
+function toHTML(html, id) {
+    document.getElementById(id).innerHTML += html;
+}
+
+function fromHTML(id) {
+    return document.getElementById(id).innerHTML;
 }
 
 

@@ -96,6 +96,13 @@ $results = $this->recommend->getResults();
   ?>
         <div class="col-xs-12 list-group" id="side-panel-<?= $cluster['label']; ?>">
 
+
+          <script>
+            generateFacets(<? echo json_encode($cluster['list'])?>, <? echo json_encode($cluster['label'])?>, <? echo json_encode($resultsSettings['deep'])?>)
+          </script>
+
+
+
           <?
           // @TODO prozatim schovano aby mi to nedelalo bordel jelikoz to je uplne jiny typ vytvareni facet
            /*if (($cluster['label'] == 'adv_search_year') && (in_array($cluster['label'], $openFacets))) {
@@ -112,15 +119,14 @@ $results = $this->recommend->getResults();
            */
           ?>
           <script>
-            createFacets(<? echo json_encode($cluster); ?>, <? echo json_encode($resultsSettings); ?>, <? echo json_encode($openFacets); ?>, <? echo json_encode($numberFacets); ?>);
-
+            //createFacets(<? echo json_encode($cluster); ?>, <? echo json_encode($resultsSettings); ?>, <? echo json_encode($openFacets); ?>, <? echo json_encode($numberFacets); ?>);
           </script>
           <?
           $l=1;
           while ($l<=$resultsSettings['deep']) {
           ?>
             <script>
-              createHierarchy(<? echo json_encode($cluster); ?>, <? echo json_encode($resultsSettings); ?>, <?= $l?>)
+              //createHierarchy(<? echo json_encode($cluster); ?>, <? echo json_encode($resultsSettings); ?>, <?= $l?>)
             </script>
           <?
             $l++;
