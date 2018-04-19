@@ -1,10 +1,3 @@
-function createFacets(facets, resultsSettings, openFacets, numberFacets) {
-
-    /**
-     *  JQuery nebo JS
-     */
-
-
     /**
      * odkaz pres prave tlacitko udelam tak e po kliknuti pravim tlacitkem na li se vzgeneruje odkaz ktery "prekryje" dany li element
      */
@@ -22,175 +15,12 @@ function createFacets(facets, resultsSettings, openFacets, numberFacets) {
 
 
 
-    console.log(facets);
-    //console.log(resultsSettings);
-    //console.log(openFacets);
-    //console.log(numberFacets);
-    var html = '';
-//<div class="col-xs-12 list-group" id="side-panel-<?= $this->escapeHtmlAttr($cluster['label']); ?>">
-
-    html += '<li class="list-group-item title">'+facets.label+'</li>';
-    var count = facets.list.length;
-    /*if (facets.label === 'Institution')
-        if ((resultsSettings.institution === "-1"))
-            count = facets.list.length;
-        else if (resultsSettings.institution > "-1")
-            count = resultsSettings.institution;
-        else
-            count = resultsSettings.default;
-    else
-        count = resultsSettings.default;*/
-
-    html += '<ul>';
-    for (var i = 0; i < count; i++) {
-        /**
-         * @TODO conspectus maji spatne tooltiptext a dispay text... maji to stejny jako value... PROOOC?!?!?
-         */
-        if (facets.list[i].operator === 'OR') {
-            if (parseInt(facets.list[i].value[0]) >= 0) { // jen facety co maji cislo
-                if (facets.list[i].value[0] === '0') { // jen facety co jsou na nulty urovni
-                    //console.log('< id="facet-'+facets.list[i].value+'">');
-                    var splitter = facets.list[i].value.split('/');
-                    splitter.splice(-1,1);
-                    var insert = splitter.join('-');
-                    //console.log('< id="facet-'+insert+'">');
-                    html += '<li class="list-group-item" id="facet-'+insert+'">' + facets.list[i].displayText;
-                    if (numberFacets.indexOf(facets.label) >= 0) {
-                        html += facets.list[i].count;
-                    }
-                    html += '</li>';
-                }
-            } else {
-                html += '<li class="list-group-item">' + facets.list[i].displayText;
-                if (numberFacets.indexOf(facets.label) >= 0) {
-                    html += facets.list[i].count;
-                }
-                html += '</li>';
-            }
-        } else {
-            html += '<li class="list-group-item">' + facets.list[i].displayText;
-            if (numberFacets.indexOf(facets.label) >= 0) {
-                html += facets.list[i].count;
-            }
-            html += '</li>';
-        }
-    }
-    html += '</ul>';
-    /*if (openFacets.indexOf(facets.label) >= 0) {
-        document.getElementById("side-panel-"+facets.label).classList.add('open')
-    }*/
-
-        document.getElementById("side-panel-"+facets.label).innerHTML = html;
-}
 
 
-/**
- * hierarchie bude fungovat tak ze najde prvi element s xtou urvni a pote se spusti funkce ktera najde a posklada vsechnz lementy s touto urovni a stejnou value
- * a nasledne innertne do html k danemu id value...pote pujde dal a najde zase stejnou uroven ale jiny value a opet najde vsechny se stejnou id i vaue a inertne
- * cela tato procedura se bude spoustet z php kde ovlivnim kterou uroven hledam
- */
-
-
-/**
- * pokud vytvarejici faceta ma nejakyh potomka tak ji nedavat li ale ul
- *
- *  <ul class="list-group-item" id="facet-1-Library-brno">Brno
- *    <li class="list-group-item" id="facet-2-Library-brno-MZK">Moravská zemská knihovna</li>
- *  </ul>
- *
- */
-
-function reateHierarchy(facets, resultsSettings, deep) {
-    var htmlUnder = '';
-    var splitter;
-    var parent;
-    var facet;
-    var first;
-    var facetSection;
-    var delka;
-    var used = new Array();
-    var pokus = 0;
-
-    var numOfTrue = 0;
-    for(var i=0;i<facets.list.length;i++){
-        if(parseInt(facets.list[i].value[0]) === deep)
-            numOfTrue++;
-    }
-    while (pokus < numOfTrue) {
-        first = true;
-        htmlUnder = '';
-        htmlUnder += '<li class="list-group-item title">'+facets.label+'</li>';
-        htmlUnder += '<ul>';
-        parent = "side-panel-"+facets.label;
-        for (var i = 0; i < facets.list.length; i++) {
-            if (facets.list[pokus].operator === 'OR') {
-                splitter = facets.list[i].value.split('/');
-                splitter.splice(-1, 1);
-                if (parseInt(splitter[0]) >= 0) { // jen facety co maji cislo
-                    if ((facets.list[i].value !== facets.list[i].displayText) || (facets.label === "Conspectus")) {
-                        delka = splitter.length - 2;
-                        if ((parseInt(splitter[0]) === deep) && ((splitter[delka] === facetSection) || (first))) {
-                            facet = "facet-" + splitter.join('-');
-                            console.log('asdasd');
-                            var level = parseInt(splitter[0]) - 1;
-                            splitter[0] = level.toString();
-                            splitter.splice(-1, 1);
-                            parent = "facet-" + splitter.join('-');
-                            if (first) {
-                                if (used.indexOf(splitter[splitter.length - 1]) === -1) {
-                                    used.push(splitter[splitter.length - 1]);
-                                    htmlUnder += '<li class="list-group-item" id="' + facet + '">' + facets.list[i].displayText + '</li>';
-
-                                    facetSection = splitter[splitter.length - 1];
-                                    first = false;
-                                }
-                            } else {
-                                htmlUnder += '<li class="list-group-item" id="' + facet + '">' + facets.list[i].displayText + '</li>';
-
-                            }
-                        }
-                    }
-                } else {
-                    htmlUnder += '<li class="list-group-item">' + facets.list[i].displayText;
-                    if (numberFacets.indexOf(facets.label) >= 0) {
-                        htmlUnder += facets.list[i].count;
-                    }
-                    htmlUnder += '</li>';
-                }
-            } else {
-                splitter = facets.list[i].value.split('/');
-                splitter.splice(-1, 1);
-                facet = "facet-" + splitter.join('-');
-                var level = parseInt(splitter[0]) - 1;
-                splitter[0] = level.toString();
-                splitter.splice(-1, 1);
-                parent = "facet-" + splitter.join('-');
-
-                htmlUnder += '<li class="list-group-item" id="' + facet + '">' + facets.list[i].displayText;
-                if (numberFacets.indexOf(facets.label) >= 0) {
-                    htmlUnder += facets.list[i].count;
-                }
-                htmlUnder += '</li>';
-            }
-        }
-        htmlUnder += '</ul>';
-        if (first === false || deep === 0) {
-            var old = document.getElementById(parent).innerHTML;
-            console.log(parent);
-            document.getElementById(parent).innerHTML = old + htmlUnder;
-        }
-        pokus++;
-    }
-}
-
-
-
-
-
-
-function generateFacets(facets, label, deep) {
+function generateFacets(facets, label) {
     console.log(facets);
     var html = '';
+    var create;
     html += '<li class="list-group-item title">'+label+'</li>';
     html += '<ul id="facet-'+label+'">';
     toHTML(html, 'side-panel-'+label);
@@ -202,14 +32,12 @@ function generateFacets(facets, label, deep) {
                 toHTML(html, 'facet-'+label);
                 html = '';
             } else { // urcite bude mit nejakeho rodice
-
-                //createHierarchy(facets, facets[i].value);
-
-                /*if (checkChildren(facets, facets[i].displayText, deep + 1)) {
-                    html += '<li class="list-group-item">'+displayText+'</li>';
-                } else {
-                    console.log('nema');
-                }*/
+                create = createHierarchy(facets, facets[i], cutter(facets[i].value));
+                console.log(create);
+                if (!document.getElementById(create[id])) {
+                    toHTML(create[html], create[id]);
+                }
+                html = '';
             }
         } else if (facets[i].operator === 'OR') { // OR facets non-hierarchical
             html += '<li class="list-group-item" style="color: red">'+facets[i].displayText+'</li>';
@@ -225,29 +53,34 @@ function generateFacets(facets, label, deep) {
     toHTML(html, 'side-panel-'+label);
 }
 
-function createHierarchy(facets, facet, deep) {
-    checkParent(facets, facet , deep-1)
-}
-
-function checkParent(facets, searchFacet, parentDeep) {
-    var value;
-    for (var i = 0; i < facets.length; i++) {
-        value = facets[i].value.split('/');
-        value.splice(-1, 1);
-        if ((facetLevel(value) === parentDeep) && (facetSection(value) === searchFacet)) {
-            return true;
-        }
+function createHierarchy(facets, facet, facetValue) {
+    var html ='';
+    var index = checkParent(facets, facetValue);
+    var facetClass;
+    // kdyz nenajde parenta tak opet zavola sam sebe a bude hledat znovu o uroven vys...
+    if (index >= 0){
+        facetClass = createClass(facetValue);
+        html += '<li class="list-group-item" style="color: blue" id="facet-'+facetClass+'">'+facets[index].displayText+'</li>';
+    } else {
+        createHierarchy(facets, facet, facetValue.slice(0,-1))
     }
-    return false;
+    html += '<li class="list-group-item" style="color: blue" id="facet-'+facetClass+'">'+facets[index].displayText+'</li>';
+    facetClass = createClass(facetValue);
+    return {
+        html: html,
+        id: facetClass
+    };
 }
 
-function checkChildren(facets, searchFacet, childrenDeep) {
+function checkParent(facets, searchFacet) {
+    var searchValue = facetSection(searchFacet.slice(0,-1));
     var value;
     for (var i = 0; i < facets.length; i++) {
-        value = facets[i].value.split('/');
-        value.splice(-1, 1);
-        if ((facetLevel(value) === childrenDeep) && (facetSection(value) === searchFacet)) {
-            return true;
+        value = cutter(facets[i].value);
+        //console.log(searchValue);
+        //console.log(value);
+        if ((facetLevel(searchValue) === facetLevel(value)) && ((searchValue) === facetSection(value))) {
+            return i;
         }
     }
     return false;
@@ -258,18 +91,23 @@ function facetLevel(facetValue) {
 }
 
 function facetSection(facetValue) {
-    return facetValue[facetValue.length - 2];
+    //console.log(facetValue.length - 1);
+    return facetValue[facetValue.length - 1];
 }
 
 function createClass(facetValue) {
-    var facetClass = cutter(facetValue);
-    facetClass.splice(-1,1);
+    var facetClass = facetValue;
+    //console.log(facetClass);
+    facetClass.slice(0,-1);
+    //console.log(facetClass);
     facetClass = facetClass.join('-');
     return facetClass;
 }
 
 function cutter(facetValue) {
-    return facetValue.split('/');
+    facetValue = facetValue.split('/');
+    facetValue = facetValue.slice(0, -1);
+    return facetValue;
 }
 
 function toHTML(html, id) {
