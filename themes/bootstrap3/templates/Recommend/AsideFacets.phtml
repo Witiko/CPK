@@ -45,6 +45,7 @@ $results = $this->recommend->getResults();
   $resultsSettings = $this->recommend->getResultsSettings();
   $openFacets = $this->recommend->getOpenFacets();
   $numberFacets = $this->recommend->getNumberFacets();
+  $subFacets = $this->recommend->getSubFacets();
   ?>
 <!-- hlavni nadpis facet hledani BEGIN -->
   <? if ($results->getResultTotal() > 0): ?>
@@ -89,7 +90,7 @@ $results = $this->recommend->getResults();
   $rangeFacets = $this->recommend->getAllRangeFacets();
   ?>
 
-<ul id="facet-Institution-1-Library-kladno">ahj</ul>
+
   <? if (!empty($sideFacetSet) && $results->getResultTotal() > 0) {
     $i = 0;
     foreach ($sideFacetSet as $title => $cluster) {
@@ -129,4 +130,8 @@ $results = $this->recommend->getResults();
     }
   }
   ?>
+
+<script>
+    setFacets(<? echo json_encode($resultsSettings)?>, <? echo json_encode($openFacets)?>, <? echo json_encode($numberFacets)?>, <? echo json_encode($subFacets)?>)
+</script>
 

@@ -62,6 +62,8 @@ class SideFacets extends SideFacetsBase
 
     protected $number = [];
 
+    protected $subOpen = [];
+
     /**
      * Store the configuration of the recommendation module.
      *
@@ -142,6 +144,10 @@ class SideFacets extends SideFacetsBase
                 = $config->Results_Settings->number->toArray();
         }
 
+        if (isset($config->Results_Settings->subOpen)) {
+            $this->subOpen
+                = $config->Results_Settings->subOpen->toArray();
+        }
     }
 
     /**
@@ -222,6 +228,11 @@ class SideFacets extends SideFacetsBase
     public function getNumberFacets()
     {
         return $this->number;
+    }
+
+    public function getSubFacets()
+    {
+        return $this->subOpen;
     }
 
 }
