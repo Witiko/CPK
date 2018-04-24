@@ -30,24 +30,41 @@ function generateFacets(facets, label) {
         if ((facets[i].operator === 'OR') && (parseInt(facets[i].value[0]) >= 0)) { // OR facet hierarchical
             if (parseInt(facets[i].value[0]) === 0) { // prvni uroven urcite nema rodice... nepocitame-li nadfacetovou uroven
                 classFacet = createClass(cutter(facets[i].value));
-                html += '<li class="list-group-item"  style="color: blue" id="facet-'+classFacet+'">'+facets[i].displayText+'</li>';
+                html += '<li class="list-group-item"  style="color: blue" id="facet-'+label+'-'+classFacet+'">'+facets[i].displayText+'</li>';
                 if (checkChildren(facets, facets[i].value)) {
-                    html += '<ul id="facet-ul-'+classFacet+'"></ul>';
+                    html += '<ul id="facet-ul-'+label+'-'+classFacet+'"></ul>';
                 }
                 toHTML(html, 'facet-ul-'+label);
                 html = '';
             } else { // urcite bude mit nejakeho rodice
-                //createHierarchy(facets, i);
+                classFacet = createClass(cutter(facets[i].value));
+                if (!existClass(classFacet)) {
+                    console.log(classFacet);
+                    var parent = 'facet-ul-'+label+'-'+createParent(facets, i);
+                    console.log(parent);
+                    //createHierarchy(facets, i);
+                    html += '<li class="list-group-item"  style="color: blue" id="facet-'+label+'-'+classFacet+'">'+facets[i].displayText+'</li>';
+
+                    if (checkChildren(facets, facets[i].value)) {
+                        html += '<ul id="facet-ul-'+label+'-'+classFacet+'"></ul>';
+                    }
+                    toHTML(html, parent);
+                    html = '';
+                }
+                //console.log(mainParent);
+
                 //console.log(create);
                 //toHTML(create[html], create[id]);
                 html = '';
             }
         } else if (facets[i].operator === 'OR') { // OR facets non-hierarchical
-            html += '<li class="list-group-item" style="color: red">'+facets[i].displayText+'</li>';
+            classFacet = facets[i].value;
+            html += '<li class="list-group-item" style="color: red" id="facet-'+label+'-'+classFacet+'">'+facets[i].displayText+'</li>';
             toHTML(html, 'facet-ul-'+label);
             html = '';
         } else { // AND facets
-            html += '<li class="list-group-item">'+facets[i].displayText+'</li>';
+            classFacet = facets[i].value;
+            html += '<li class="list-group-item" id="facet-'+label+'-'+classFacet+'">'+facets[i].displayText+'</li>';
             toHTML(html, 'facet-ul-'+label);
             html = '';
         }
@@ -60,10 +77,10 @@ function createHierarchy(facets, facetID) {
     var facetValue = cutter(facets[facetID].value);
 
     var html ='';
-    var mainParent = 'facet-ul-'+createMainParent(facets, facetID);
-    //console.log(mainParent);
+    //var mainParent = 'facet-ul-'+createMainParent(facets, facetID);
+    /*console.log(mainParent);
     var facetClass = 'facet-'+createClass(facetValue);
-    //console.log(facetClass);
+    console.log(facetClass);
 
 
     //html += '<li class="list-group-item" style="color: blue" id="facet-'+facetClass+'">'+facets[facetID].displayText+'</li>';
@@ -72,7 +89,7 @@ function createHierarchy(facets, facetID) {
     //console.log(facetValue);
     var zbytek = facetValue;
     zbytek = zbytek.slice(2);
-    //console.log(zbytek);
+    console.log(zbytek);
 
     //console.log(facetValue);
 
@@ -80,28 +97,28 @@ function createHierarchy(facets, facetID) {
         zbytek = zbytek.slice(0,1);
         mainParent = findChildren(mainParent, zbytek);
     }
-
-
-    var parent = mainParent;
-    while (parent !== facetClass) {
-        var num = checkParent(facets, parent, facetClass);
-        html += '<li class="list-group-item"  style="color: blue" id="'+num+'">'+'asdasdddd'+'</li>';
-        /*if (!existClass(parent)) {
-            parent = mainParent;
-        }*/
-        toHTML(html, parent);
-        parent = num;
-        parent = parent.split('-');
-        parent.splice(1,1);
-        var cislo = parseInt(parent[1])+1;
-        parent.splice(1,1,cislo.toString());
-        parent = parent.join('-');
-        console.log(parent);
-        console.log(facetClass);
-    }
     console.log(mainParent);
-    html += '<li class="list-group-item"  style="color: blue" id="'+num+'">'+'asdasdddd'+'</li>';
-    toHTML(html, mainParent);
+    console.log('===============');
+
+
+        var parent = mainParent;
+        while (parent !== facetClass) {
+            var num = checkParent(facets, parent, facetClass);
+            html += '<li class="list-group-item"  style="color: blue" id="'+num+'">'+'asdasdddd'+'</li>';
+
+            toHTML(html, parent);
+            parent = num;
+            parent = parent.split('-');
+            parent.splice(1,1);
+            var cislo = parseInt(parent[1])+1;
+            parent.splice(1,1,cislo.toString());
+            parent = parent.join('-');
+            console.log(parent);
+            console.log(facetClass);
+        }
+        console.log(mainParent);
+        html += '<li class="list-group-item"  style="color: blue" id="'+num+'">'+'asdasdddd'+'</li>';
+        toHTML(html, mainParent);*/
 
     //console.log(mainParent);
     //console.log(facetClass);
@@ -136,11 +153,11 @@ function checkChildren(facets, facetValue) {
     facetValue = cutter(facetValue);
     var cislo = parseInt(facetValue[0])+1;
     facetValue.splice(0,1,cislo.toString());
-    console.log(facetValue);
+    //console.log(facetValue);
     for (var i = 0; i < facets.length; i++) {
         var value = cutter(facets[i].value);
         value = value.slice(0,2);
-        console.log(value);
+        //console.log(value);
         var stejne = true;
         for (var l = 0; l < value.length; l++) {
             if (facetValue[l] !== value[l]){
@@ -154,16 +171,21 @@ function checkChildren(facets, facetValue) {
     return false;
 }
 
-function createMainParent(facets, facetID) {
+function createParent(facets, facetID) {
     var facetValue = cutter(facets[facetID].value);
-    facetValue.splice(0,1,'0');
-    facetValue = facetValue.slice(0,2);
+    var cislo = parseInt(facetValue[0])-1;
+    facetValue.splice(0,1,cislo.toString());
+    facetValue = facetValue.slice(0,-1);
+    //console.log(facetValue);
+    //facetValue = facetValue.slice(0,2);
     facetValue = createClass(facetValue);
     //console.log(facetValue);
     return facetValue;
 }
 
 function findChildren(mainParent, zbytek) {
+    //console.log(mainParent);
+    //console.log(zbytek);
     mainParent = mainParent.split('-');
     var cislo = parseInt(mainParent[2])+1;
     mainParent.splice(2,1,cislo.toString());
