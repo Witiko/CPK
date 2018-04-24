@@ -21,31 +21,34 @@ function generateFacets(facets, label) {
     console.log(facets);
     var html = '';
     var create;
-    html += '<li class="list-group-item title">'+label+'</li>';
-    html += '<ul id="facet-'+label+'">';
+    var classFacet;
+    html += '<li class="list-group-item title" id="facet-'+label+'">'+label+'</li>';
+    html += '<ul id="facet-ul-'+label+'">';
     toHTML(html, 'side-panel-'+label);
     html = '';
     for (var i = 0; i < facets.length; i++) {
         if ((facets[i].operator === 'OR') && (parseInt(facets[i].value[0]) >= 0)) { // OR facet hierarchical
             if (parseInt(facets[i].value[0]) === 0) { // prvni uroven urcite nema rodice... nepocitame-li nadfacetovou uroven
-                html += '<li class="list-group-item"  style="color: blue">'+facets[i].displayText+'</li>';
-                toHTML(html, 'facet-'+label);
+                classFacet = createClass(cutter(facets[i].value));
+                html += '<li class="list-group-item"  style="color: blue" id="facet-'+classFacet+'">'+facets[i].displayText+'</li>';
+                if (checkChildren(facets, facets[i].value)) {
+                    html += '<ul id="facet-ul-'+classFacet+'"></ul>';
+                }
+                toHTML(html, 'facet-ul-'+label);
                 html = '';
             } else { // urcite bude mit nejakeho rodice
-                create = createHierarchy(facets, facets[i], cutter(facets[i].value));
-                console.log(create);
-                if (!document.getElementById(create[id])) {
-                    toHTML(create[html], create[id]);
-                }
+                //createHierarchy(facets, i);
+                //console.log(create);
+                //toHTML(create[html], create[id]);
                 html = '';
             }
         } else if (facets[i].operator === 'OR') { // OR facets non-hierarchical
             html += '<li class="list-group-item" style="color: red">'+facets[i].displayText+'</li>';
-            toHTML(html, 'facet-'+label);
+            toHTML(html, 'facet-ul-'+label);
             html = '';
         } else { // AND facets
             html += '<li class="list-group-item">'+facets[i].displayText+'</li>';
-            toHTML(html, 'facet-'+label);
+            toHTML(html, 'facet-ul-'+label);
             html = '';
         }
     }
@@ -53,38 +56,135 @@ function generateFacets(facets, label) {
     toHTML(html, 'side-panel-'+label);
 }
 
-function createHierarchy(facets, facet, facetValue) {
+function createHierarchy(facets, facetID) {
+    var facetValue = cutter(facets[facetID].value);
+
     var html ='';
-    var index = checkParent(facets, facetValue);
-    var facetClass;
-    // kdyz nenajde parenta tak opet zavola sam sebe a bude hledat znovu o uroven vys...
-    if (index >= 0){
-        facetClass = createClass(facetValue);
-        html += '<li class="list-group-item" style="color: blue" id="facet-'+facetClass+'">'+facets[index].displayText+'</li>';
-    } else {
-        createHierarchy(facets, facet, facetValue.slice(0,-1))
+    var mainParent = 'facet-ul-'+createMainParent(facets, facetID);
+    //console.log(mainParent);
+    var facetClass = 'facet-'+createClass(facetValue);
+    //console.log(facetClass);
+
+
+    //html += '<li class="list-group-item" style="color: blue" id="facet-'+facetClass+'">'+facets[facetID].displayText+'</li>';
+
+
+    //console.log(facetValue);
+    var zbytek = facetValue;
+    zbytek = zbytek.slice(2);
+    //console.log(zbytek);
+
+    //console.log(facetValue);
+
+    while (!existClass(mainParent)) {
+        zbytek = zbytek.slice(0,1);
+        mainParent = findChildren(mainParent, zbytek);
     }
-    html += '<li class="list-group-item" style="color: blue" id="facet-'+facetClass+'">'+facets[index].displayText+'</li>';
-    facetClass = createClass(facetValue);
-    return {
+
+
+    var parent = mainParent;
+    while (parent !== facetClass) {
+        var num = checkParent(facets, parent, facetClass);
+        html += '<li class="list-group-item"  style="color: blue" id="'+num+'">'+'asdasdddd'+'</li>';
+        /*if (!existClass(parent)) {
+            parent = mainParent;
+        }*/
+        toHTML(html, parent);
+        parent = num;
+        parent = parent.split('-');
+        parent.splice(1,1);
+        var cislo = parseInt(parent[1])+1;
+        parent.splice(1,1,cislo.toString());
+        parent = parent.join('-');
+        console.log(parent);
+        console.log(facetClass);
+    }
+    console.log(mainParent);
+    html += '<li class="list-group-item"  style="color: blue" id="'+num+'">'+'asdasdddd'+'</li>';
+    toHTML(html, mainParent);
+
+    //console.log(mainParent);
+    //console.log(facetClass);
+
+    // ted se musi vytvorit hierarchye od mainParent po facetValue
+
+    //console.log(mainParent);
+    // first class bude kntrolovat od nejvzssi urovne po nejniysi a ay najde prvni ktera uz neexistuje tak ji nastavi na first class
+    /*return {
         html: html,
-        id: facetClass
-    };
+        id: firstClass
+    };*/
 }
 
-function checkParent(facets, searchFacet) {
-    var searchValue = facetSection(searchFacet.slice(0,-1));
-    var value;
+function checkParent(facets, parent, facetClass) {
+    facetClass = facetClass.split('-');
+    facetClass.splice(0,3);
+    //console.log(facetClass);
+    parent = parent.split('-');
+    var searched = parent.concat(facetClass.slice(0,1));
+    //var cislo = parseInt(searched[2])+1;
+    //console.log(parseInt(searched[2])+1);
+    //searched.splice(2,1,cislo.toString());
+    searched = searched.join('-');
+    console.log(searched);
+
+
+    return searched;
+}
+
+function checkChildren(facets, facetValue) {
+    facetValue = cutter(facetValue);
+    var cislo = parseInt(facetValue[0])+1;
+    facetValue.splice(0,1,cislo.toString());
+    console.log(facetValue);
     for (var i = 0; i < facets.length; i++) {
-        value = cutter(facets[i].value);
-        //console.log(searchValue);
-        //console.log(value);
-        if ((facetLevel(searchValue) === facetLevel(value)) && ((searchValue) === facetSection(value))) {
-            return i;
+        var value = cutter(facets[i].value);
+        value = value.slice(0,2);
+        console.log(value);
+        var stejne = true;
+        for (var l = 0; l < value.length; l++) {
+            if (facetValue[l] !== value[l]){
+                stejne = false;
+            }
+        }
+        if (stejne) {
+            return true;
         }
     }
     return false;
 }
+
+function createMainParent(facets, facetID) {
+    var facetValue = cutter(facets[facetID].value);
+    facetValue.splice(0,1,'0');
+    facetValue = facetValue.slice(0,2);
+    facetValue = createClass(facetValue);
+    //console.log(facetValue);
+    return facetValue;
+}
+
+function findChildren(mainParent, zbytek) {
+    mainParent = mainParent.split('-');
+    var cislo = parseInt(mainParent[2])+1;
+    mainParent.splice(2,1,cislo.toString());
+    console.log(mainParent);
+    console.log(zbytek);
+    var konec = mainParent.concat(zbytek);
+    konec = konec.join('-');
+    //console.log(konec);
+    return konec;
+}
+
+function existClass(className) {
+    if (document.getElementById(className)){
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+
 
 function facetLevel(facetValue) {
     return facetValue[0];
