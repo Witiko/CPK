@@ -45,7 +45,7 @@ $results = $this->recommend->getResults();
   $resultsSettings = $this->recommend->getResultsSettings();
   $openFacets = $this->recommend->getOpenFacets();
   $numberFacets = $this->recommend->getNumberFacets();
-  $subFacets = $this->recommend->getSubFacets();
+  $subOpen = $this->recommend->getSubFacets();
   ?>
 <!-- hlavni nadpis facet hledani BEGIN -->
   <? if ($results->getResultTotal() > 0): ?>
@@ -96,14 +96,11 @@ $results = $this->recommend->getResults();
     foreach ($sideFacetSet as $title => $cluster) {
       if (in_array($cluster['label'],($this->layout()->headerType != "newlibraries")? $allFieldsSection : $librariesSection)) {
   ?>
-        <? if ($i != 0): ?>
-          <hr>
-        <? endif; ?>
         <div class="col-xs-12 list-group" id="side-panel-<?= str_replace(' ','-',$cluster['label']); ?>">
 
 
           <script>
-            generateFacets(<? echo json_encode($cluster['list'])?>, <? echo json_encode(str_replace(' ','-',$cluster['label']))?>)
+            generateFacets(<? echo json_encode($cluster['list'])?>, <? echo json_encode(str_replace(' ','-',$cluster['label']))?>, <? echo json_encode($numberFacets)?>)
           </script>
 
 
@@ -125,13 +122,12 @@ $results = $this->recommend->getResults();
           ?>
 
           </div>
-  <?    $i++;
-      }
+    <?}
     }
   }
   ?>
 
 <script>
-    setFacets(<? echo json_encode($resultsSettings)?>, <? echo json_encode($openFacets)?>, <? echo json_encode($numberFacets)?>, <? echo json_encode($subFacets)?>)
+    setFacets(<? echo json_encode($resultsSettings)?>, <? echo json_encode($openFacets)?>, <? echo json_encode($subOpen)?>)
 </script>
 

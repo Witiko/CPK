@@ -17,7 +17,7 @@
 
 
 
-function generateFacets(facets, label) {
+function generateFacets(facets, label, number) {
     //console.log(facets);
     var html = '';
     var classFacet;
@@ -28,24 +28,29 @@ function generateFacets(facets, label) {
     for (var i = 0; i < facets.length; i++) {
         if ((facets[i].operator === 'OR') && (parseInt(facets[i].value[0]) >= 0)) { // OR facet hierarchical
             if (parseInt(facets[i].value[0]) === 0) { // prvni uroven urcite nema rodice... nepocitame-li nadfacetovou uroven
-                classFacet = createClass(cutter(facets[i].value));
-                html += '<li class="list-group-item"  style="color: blue" id="facet-'+label+'-'+classFacet+'">'+facets[i].displayText+'</li>';
+                classFacet = 'facet-'+label+'-'+createClass(cutter(facets[i].value));
+                var classFacetUl = createClass(cutter(facets[i].value));
                 if (checkChildren(facets, facets[i].value)) {
-                    html += '<ul id="facet-ul-'+label+'-'+classFacet+'"></ul>';
+                    html += '<li class="list-group-item  or-facet parent"  style="color: blue" id="'+classFacet+'">'+facets[i].displayText+'</li>';
+                    html += '<ul class="ul-parent" id="facet-ul-'+label+'-'+classFacetUl+'"></ul>';
+                } else {
+                    html += '<li class="list-group-item  or-facet"  style="color: blue" id="'+classFacet+'">'+facets[i].displayText+'</li>';
                 }
                 toHTML(html, 'facet-ul-'+label);
                 html = '';
             } else { // urcite bude mit nejakeho rodice
                 // spoliha se na to, ze v poli je nejdrive vyssi uroven a az pote nizsi uroven (podfaseta k yobrazena pod vyssi facetou)
-                classFacet = createClass(cutter(facets[i].value));
+                classFacet = 'facet-'+label+'-'+createClass(cutter(facets[i].value));
+                var classFacetUl = createClass(cutter(facets[i].value));
                 if (!existClass(classFacet)) {
                     var parent = 'facet-ul-'+label+'-'+createParent(facets, i);
                     //createHierarchy(facets, i);
-                    html += '<li class="list-group-item"  style="color: blue" id="facet-'+label+'-'+classFacet+'">'+facets[i].displayText+'</li>';
-
                     if (checkChildren(facets, facets[i].value)) {
                         // @TODO toto se jste nechova uplne spravne
-                        html += '<ul id="facet-ul-'+label+'-'+classFacet+'"></ul>';
+                        html += '<li class="list-group-item or-facet parent"  style="color: blue" id="'+classFacet+'">'+facets[i].displayText+'</li>';
+                        html += '<ul class="ul-parent" id="facet-ul-'+label+'-'+classFacetUl+'"></ul>';
+                    } else {
+                        html += '<li class="list-group-item or-facet"  style="color: blue" id="'+classFacet+'">'+facets[i].displayText+'</li>';
                     }
                     toHTML(html, parent);
                     html = '';
@@ -53,14 +58,20 @@ function generateFacets(facets, label) {
                 html = '';
             }
         } else if (facets[i].operator === 'OR') { // OR facets non-hierarchical
-            classFacet = facets[i].value;
-            html += '<li class="list-group-item" style="color: red" id="facet-'+label+'-'+classFacet+'">'+facets[i].displayText+'</li>';
+            classFacet = 'facet-'+label+'-'+facets[i].value;
+            html += '<li class="list-group-item or-facet" style="color: red" id="'+classFacet+'">'+facets[i].displayText+'</li>';
             toHTML(html, 'facet-ul-'+label);
             html = '';
         } else { // AND facets
-            classFacet = facets[i].value;
-            html += '<li class="list-group-item" id="facet-'+label+'-'+classFacet+'">'+facets[i].displayText+'</li>';
+            classFacet = 'facet-'+label+'-'+facets[i].value;
+            html += '<li class="list-group-item and-facet" id="'+classFacet+'">'+facets[i].displayText+'</li>';
             toHTML(html, 'facet-ul-'+label);
+            html = '';
+        }
+        if (number.indexOf(label) !== -1) {
+            //console.log(classFacet);
+            html += '<span>'+facets[i].count+'</span>';
+            toHTML(html, classFacet);
             html = '';
         }
     }
@@ -127,11 +138,32 @@ function toHTML(html, id) {
 
 
 
-function setFacets(results, open, number, subOpen) {
+function setFacets(results, open, subOpen) {
+    $( "#side-facets-placeholder .list-group" ).children('ul').each(function() {
+        $(this).addClass("hide");
+        for (var i = 0; i < open.length; i++) {
+            //console.log(open[i]);
+            if (this.id.search(open[i]) >= 0) {
+                $(this).removeClass("hide");
+                //$(this).children('li').removeClass("hide");
+                $(this).children('ul').addClass("hide");
+            }
+        }
+    });
+
+    $( "#side-facets-placeholder .list-group ul" ).children('ul').each(function() {
+        $(this).addClass("hide");
+        for (var i = 0; i < subOpen.length; i++) {
+            //console.log(open[i]);
+            if (this.id.search(subOpen[i]) >= 0) {
+                $(this).removeClass("hide");
+                //$(this).children('li').removeClass("hide");
+                $(this).children('ul').addClass("hide");
+            }
+        }
+    });
     console.log(results);
     console.log(open);
-    console.log(number);
-    console.log(subOpen);
 }
 
 

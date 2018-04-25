@@ -1,27 +1,71 @@
-.title {
-    &.open {
-        border-radius: @border-radius-base;
-        &:before {content: '\25BC';}
-    }
-    &:after {
-        content: none !important;
-    }
-    &:before {
-        content: '\25B2';
-        float: left;
-    }
-}
-
 #side-facets-placeholder {
-    hr {
-        margin-top: 0.5em;
-        margin-bottom: 0.5em;
-        border-width: 2px;
-    }
     ul {
         padding-left: 15px;
     }
     li {
         padding-left: 0;
+    }
+
+    .title {
+        &:after {
+            content: none;
+        }
+    }
+
+    .list-group {
+        background-color: inherit;
+        padding: 10px;
+        margin: 5px;
+        border: 0 grey solid;
+        border-bottom-width: 2px;
+        //border-color: grey;
+        //border-style: solid;
+        .list-group-item {
+            background-color: inherit;
+        }
+        .list-group-item.active {
+            background-color: inherit;
+        }
+        .or-facet {
+            font-size: 14px;
+            &:before {
+                font-family: pr-icons;
+                content: "\ebd4";
+                color: green;
+                font-size: 14px;
+            }
+        }
+        .or-facet.active {
+            &:before {
+                content: "\eb06";
+            }
+        }
+
+        .parent {
+
+            &:before {
+                font-family: pr-icons;
+                content: "\ebd4";
+                color: green;
+                font-size: 14px;
+            }
+        }
+
+        .ul-parent {
+
+            &:before {
+                font-family: pr-icons;
+                content: "\ead8";
+                color: pink;
+                font-size: 14px;
+            }
+        }
+
+        .and-facet {
+            font-size: 14px;
+            &:active {
+                color: purple;
+            }
+        }
     }
 }
