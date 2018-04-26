@@ -21,7 +21,8 @@ function generateFacets(facets, label, number) {
     //console.log(facets);
     var html = '';
     var classFacet;
-    html += '<li class="list-group-item title" id="facet-'+label+'">'+label+'</li>';
+        html += '<i class="arrow" id="facet-'+label+'-ul"></i>';
+        html += '<li class="list-group-item title" id="facet-'+label+'">'+label+'</li>';
     html += '<ul id="facet-ul-'+label+'">';
     toHTML(html, 'side-panel-'+label);
     html = '';
@@ -31,6 +32,7 @@ function generateFacets(facets, label, number) {
                 classFacet = 'facet-'+label+'-'+createClass(cutter(facets[i].value));
                 var classFacetUl = createClass(cutter(facets[i].value));
                 if (checkChildren(facets, facets[i].value)) {
+                    html += '<i class="arrow" id="'+classFacet+'-ul"></i>';
                     html += '<li class="list-group-item  or-facet parent"  style="color: blue" id="'+classFacet+'">'+facets[i].displayText+'</li>';
                     html += '<ul class="ul-parent" id="facet-ul-'+label+'-'+classFacetUl+'"></ul>';
                 } else {
@@ -47,6 +49,7 @@ function generateFacets(facets, label, number) {
                     //createHierarchy(facets, i);
                     if (checkChildren(facets, facets[i].value)) {
                         // @TODO toto se jste nechova uplne spravne
+                        html += '<i class="arrow" id="'+classFacet+'-ul"></i>';
                         html += '<li class="list-group-item or-facet parent"  style="color: blue" id="'+classFacet+'">'+facets[i].displayText+'</li>';
                         html += '<ul class="ul-parent" id="facet-ul-'+label+'-'+classFacetUl+'"></ul>';
                     } else {
@@ -137,7 +140,6 @@ function toHTML(html, id) {
 
 
 
-
 function setFacets(results, open, subOpen) {
     $( "#side-facets-placeholder .list-group" ).children('ul').each(function() {
         $(this).addClass("hide");
@@ -148,6 +150,12 @@ function setFacets(results, open, subOpen) {
                 //$(this).children('li').removeClass("hide");
                 $(this).children('ul').addClass("hide");
             }
+        }
+        $(this).children('li').slice(parseInt(results.default)).addClass("hide");
+
+        //$( "li" ).clone().add( "<span>Again</span>" ).appendTo( $(this).children('li:nth-child(4)'));
+        if ($(this).children('ul li').size() > parseInt(results.default)) {
+            $(this).children("li:nth-of-type("+results.default+")").after( "<p class='new'>Zobrazit všechny</p>" );
         }
     });
 
@@ -166,9 +174,59 @@ function setFacets(results, open, subOpen) {
     console.log(open);
 }
 
-
-
 jQuery( document ).ready( function( $ ) {
+
+    $( 'body' ).on( 'click', '.new', function( event ) {
+        var pokus = "#"+event.target.parentNode.id;
+
+        $( pokus ).children('li').each(function() {
+            $(this).removeClass("hide");
+
+
+        });
+        $(event.target).addClass("hide");
+        $( pokus ).append("<p class='old'>skryt vse</p>");
+    });
+
+    $( 'body' ).on( 'click', '.old', function( event ) {
+        var pokus = "#"+event.target.parentNode.id;
+
+        $(event.target).addClass("hide");
+        $(pokus).children('li').slice(6).addClass("hide");
+        // @TODO vyresit misto pevneho cisla 6 aby to bral z .ini
+        $(pokus).children("li:nth-of-type(6)").after( "<p class='new'>Zobrazit všechny</p>" );
+    });
+
+
+    // nefunguje dobre protoe nefunguje dobre checkChildren!!!!!
+    $( 'body' ).on( 'click', '.arrow', function( event ) {
+        var classArrow = event.target.id;
+        classArrow = classArrow.split('-');
+        classArrow = classArrow.slice(0, -1);
+        classArrow.splice(1,0,'ul');
+        classArrow = createClass(classArrow);
+        $('#'+classArrow).each(function() {
+            console.log(classArrow);
+            $(this).removeClass("hide");
+        });
+        $(event.target).addClass("active");
+        console.log('vse ok');
+    });
+
+    $( 'body' ).on( 'click', '.arrow.active', function( event ) {
+        var classArrow = event.target.id;
+        classArrow = classArrow.split('-');
+        classArrow = classArrow.slice(0, -1);
+        classArrow.splice(1,0,'ul');
+        classArrow = createClass(classArrow);
+        $('#'+classArrow).each(function() {
+            console.log(classArrow);
+            $(this).addClass("hide");
+        });
+        $(event.target).removeClass("active");
+        console.log('vse ok');
+    });
+
 
 	/*
 	 * Save chosen institutions to DB
