@@ -21,12 +21,13 @@ function generateFacets(facets, label, number) {
     //console.log(facets);
     var html = '';
     var classFacet;
-        html += '<i class="arrow" id="facet-'+label+'-ul"></i>';
-        html += '<li class="list-group-item title" id="facet-'+label+'">'+label+'</li>';
+        html += '';
+        html += '<i class="arrow" id="facet-'+label+'-ul"><li class="list-group-item title" id="facet-'+label+'">'+label+'</li></i>';
     html += '<ul id="facet-ul-'+label+'">';
     toHTML(html, 'side-panel-'+label);
     html = '';
     for (var i = 0; i < facets.length; i++) {
+        facets[i].value = transFacet(facets[i].value);
         if ((facets[i].operator === 'OR') && (parseInt(facets[i].value[0]) >= 0)) { // OR facet hierarchical
             if (parseInt(facets[i].value[0]) === 0) { // prvni uroven urcite nema rodice... nepocitame-li nadfacetovou uroven
                 classFacet = 'facet-'+label+'-'+createClass(cutter(facets[i].value));
@@ -80,6 +81,17 @@ function generateFacets(facets, label, number) {
     }
     html += '</ul>';
     toHTML(html, 'side-panel-'+label);
+}
+
+function transFacet(facet) {
+    //console.log(facet);
+    facet = facet.split('-').join('_');
+    //facet = facet.split('/').join('-');
+    facet = facet.split(' ').join('');
+    facet = facet.split('.').join('');
+    facet = facet.split(',').join('');
+    console.log(facet);
+    return facet;
 }
 
 
