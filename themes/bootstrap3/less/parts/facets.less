@@ -22,11 +22,14 @@
         //border-style: solid;
         .list-group-item {
             background-color: inherit;
+            span {
+                cursor: pointer;
+            }
         }
         .list-group-item.active {
             background-color: inherit;
         }
-        .or-facet {
+        .or-facet span {
             font-size: 14px;
             &:before {
                 font-family: pr-icons;
@@ -35,13 +38,21 @@
                 font-size: 14px;
             }
         }
-        .or-facet.active {
+        .or-facet span.half-active {
+            &:before {
+                content: "\e92c";
+            }
+        }
+        .or-facet span.active {
             &:before {
                 content: "\eb06";
             }
         }
+        .and-facet span.active {
+            font-weight: bold;
+        }
 
-        .parent {
+        .parent span {
             &:before {
                 font-family: pr-icons;
                 content: "\ebd4";
@@ -52,21 +63,11 @@
 
         .arrow {
             &:before {
+                margin-left: -20px;
                 font-family: pr-icons;
                 content: "\ead8";
                 color: pink;
                 font-size: 14px;
-            }
-        }
-
-        .ul-parent {
-
-        }
-
-        .and-facet {
-            font-size: 14px;
-            &:active {
-                color: purple;
             }
         }
     }

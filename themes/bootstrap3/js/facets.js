@@ -9,99 +9,125 @@
      */
 
 
-    /**
-     * vygenerovat vsechny nacteny facety ale pak urcit kolik jich zobrazit + ktery nechat otevreny defaultne
-     */
-
-
-
-
-
+/**
+ * This function insert to HTML list of all facets
+ *
+ * @param facets    object of all facets
+ * @param label     name of one section facet which will be generated
+ * @param number    array of facets section where we want print results count
+ */
 function generateFacets(facets, label, number) {
-    //console.log(facets);
+    console.log(facets);
     var html = '';
-    var classFacet;
-        html += '';
-        html += '<i class="arrow" id="facet-'+label+'-ul"><li class="list-group-item title" id="facet-'+label+'">'+label+'</li></i>';
+    var facetId;
+    var facetIdParent;
+    var facetValue;
+    var facetOperator;
+    var facetText;
+    label = transFacet(label);
+    number = transAll(number);
+    html += '<div class="col-xs-12 list-group" id="side-panel-'+label+'">';
+    toHTML(html, 'side-facets-placeholder');
+    html = '';
+    html += '<li class="list-group-item title" id="facet-'+label+'"><i class="arrow" id="facet-'+label+'-ul"><span>'+label+'</span></i></li>';
     html += '<ul id="facet-ul-'+label+'">';
     toHTML(html, 'side-panel-'+label);
     html = '';
     for (var i = 0; i < facets.length; i++) {
-        facets[i].value = transFacet(facets[i].value);
-        if ((facets[i].operator === 'OR') && (parseInt(facets[i].value[0]) >= 0)) { // OR facet hierarchical
-            if (parseInt(facets[i].value[0]) === 0) { // prvni uroven urcite nema rodice... nepocitame-li nadfacetovou uroven
-                classFacet = 'facet-'+label+'-'+createClass(cutter(facets[i].value));
-                var classFacetUl = createClass(cutter(facets[i].value));
-                if (checkChildren(facets, facets[i].value)) {
-                    html += '<i class="arrow" id="'+classFacet+'-ul"></i>';
-                    html += '<li class="list-group-item  or-facet parent"  style="color: blue" id="'+classFacet+'">'+facets[i].displayText+'</li>';
-                    html += '<ul class="ul-parent" id="facet-ul-'+label+'-'+classFacetUl+'"></ul>';
+        facets[i].value = transFacet(facets[i].value); // translate some char to another char
+    }
+    for (var i = 0; i < facets.length; i++) {
+        facetValue = facets[i].value;
+        facetOperator = facets[i].operator;
+        facetText = facets[i].displayText;
+        if ((facetOperator === 'OR') && (parseInt(facetValue[0]) >= 0)) { // OR facet hierarchical
+            if (facetValue[0] === '0') { // first level facet
+                facetId = 'facet-'+label+'-'+createId(cutter(facetValue).slice(0, -1));
+                if (checkChildren(facets, facetValue, i)) {
+                    facetIdParent = createId(cutter(facetValue).slice(0, -1));
+                    html += '<li class="list-group-item or-facet" style="color: blue" id="'+facetId+'"><i class="arrow" id="'+facetId+'-ul"></i><span class="parent">'+facetText+'</span></li>';
+                    html += '<ul class="ul-parent" id="facet-ul-'+label+'-'+facetIdParent+'"></ul>';
                 } else {
-                    html += '<li class="list-group-item  or-facet"  style="color: blue" id="'+classFacet+'">'+facets[i].displayText+'</li>';
+                    html += '<li class="list-group-item or-facet" style="color: blue" id="'+facetId+'"><span>'+facetText+'</span></li>';
                 }
                 toHTML(html, 'facet-ul-'+label);
-                html = '';
-            } else { // urcite bude mit nejakeho rodice
+            } else { // second or more level facet, always have some parent
                 // spoliha se na to, ze v poli je nejdrive vyssi uroven a az pote nizsi uroven (podfaseta k yobrazena pod vyssi facetou)
-                classFacet = 'facet-'+label+'-'+createClass(cutter(facets[i].value));
-                var classFacetUl = createClass(cutter(facets[i].value));
-                if (!existClass(classFacet)) {
-                    var parent = 'facet-ul-'+label+'-'+createParent(facets, i);
-                    //createHierarchy(facets, i);
-                    if (checkChildren(facets, facets[i].value)) {
-                        // @TODO toto se jste nechova uplne spravne
-                        html += '<i class="arrow" id="'+classFacet+'-ul"></i>';
-                        html += '<li class="list-group-item or-facet parent"  style="color: blue" id="'+classFacet+'">'+facets[i].displayText+'</li>';
-                        html += '<ul class="ul-parent" id="facet-ul-'+label+'-'+classFacetUl+'"></ul>';
-                    } else {
-                        html += '<li class="list-group-item or-facet"  style="color: blue" id="'+classFacet+'">'+facets[i].displayText+'</li>';
-                    }
-                    toHTML(html, parent);
-                    html = '';
+                facetId = 'facet-'+label+'-'+createId(cutter(facetValue).slice(0, -1));
+
+                var parent = label+'-'+createParent(facets, i);
+                if (checkChildren(facets, facetValue, i)) {
+                    // @TODO toto se jste nechova uplne spravne
+                    facetIdParent = createId(cutter(facetValue).slice(0, -1));
+                    html += '<li class="list-group-item or-facet facet-'+parent+'" style="color: blue" id="'+facetId+'"><i class="arrow" id="'+facetId+'-ul"></i><span class="parent child">'+facetText+'</span></li>';
+                    html += '<ul class="ul-parent facet-'+parent+'" id="facet-ul-'+label+'-'+facetIdParent+'"></ul>';
+                } else {
+                    html += '<li class="list-group-item or-facet '+'facet-'+parent+'" style="color: blue" id="'+facetId+'"><span class="child">'+facetText+'</span></li>';
                 }
-                html = '';
+                toHTML(html, 'facet-ul-'+parent);
             }
-        } else if (facets[i].operator === 'OR') { // OR facets non-hierarchical
-            classFacet = 'facet-'+label+'-'+facets[i].value;
-            html += '<li class="list-group-item or-facet" style="color: red" id="'+classFacet+'">'+facets[i].displayText+'</li>';
+        } else if (facetOperator === 'OR') { // OR facet non-hierarchical
+            facetId = 'facet-'+label+'-'+createId(cutter(facetValue));
+            html += '<li class="list-group-item or-facet" style="color: red" id="'+facetId+'"><span>'+facetText+'</span></li>';
             toHTML(html, 'facet-ul-'+label);
-            html = '';
-        } else { // AND facets
-            classFacet = 'facet-'+label+'-'+facets[i].value;
-            html += '<li class="list-group-item and-facet" id="'+classFacet+'">'+facets[i].displayText+'</li>';
+        } else { // AND facet
+            facetId = 'facet-'+label+'-'+createId(cutter(facetValue));
+            html += '<li class="list-group-item and-facet" id="'+facetId+'"><span>'+facetText+'</span></li>';
             toHTML(html, 'facet-ul-'+label);
-            html = '';
         }
+        html = '';
         if (number.indexOf(label) !== -1) {
-            //console.log(classFacet);
-            html += '<span>'+facets[i].count+'</span>';
-            toHTML(html, classFacet);
+            html += '<b>'+facets[i].count+'</b>';
+            toHTML(html, facetId);
             html = '';
         }
     }
-    html += '</ul>';
+    html += '</ul></div>';
     toHTML(html, 'side-panel-'+label);
 }
 
-function transFacet(facet) {
-    //console.log(facet);
-    facet = facet.split('-').join('_');
-    //facet = facet.split('/').join('-');
-    facet = facet.split(' ').join('');
-    facet = facet.split('.').join('');
-    facet = facet.split(',').join('');
-    console.log(facet);
-    return facet;
+/**
+ * Replace some chars in string, as czech diacritic or special char
+ *
+ * @param str
+ * @returns {string | *}
+ */
+function transFacet(str) {
+    var accents    = 'ĚŠČŘŽÝÁÍÉěščřžýáíéŤťĎď.,-():';
+    var accentsOut = "ESCRZYAIEescrzyaieTtDd______";
+    str = str.split('');
+    var strLen = str.length;
+    var i, x;
+    for (i = 0; i < strLen; i++) {
+        if ((x = accents.indexOf(str[i])) !== -1) {
+            str[i] = accentsOut[x];
+        }
+    }
+    str = str.join('').split('_').join('').split(' ').join('');
+    return str;
+}
+
+/**
+ * Replace some chars in array, as czech diacritic or special char
+ *
+ * @param array
+ * @returns {*}
+ */
+function transAll(array) {
+    for (var i = 0; i < array.length; i++) {
+        array[i] = transFacet(array[i]);
+    }
+    return array;
 }
 
 
-function checkChildren(facets, facetValue) {
-    facetValue = cutter(facetValue);
+function checkChildren(facets, facetValue, pos) {
+    facetValue = cutter(facetValue).slice(0, -1);
     var cislo = parseInt(facetValue[0])+1;
     facetValue.splice(0,1,cislo.toString());
-    for (var i = 0; i < facets.length; i++) {
-        var value = cutter(facets[i].value);
-        value = value.slice(0,2);
+    for (var i = pos; i < facets.length; i++) {
+        var value = cutter(facets[i].value).slice(0, -1);
+        value = value.slice(0,-1);
         var stejne = true;
         for (var l = 0; l < value.length; l++) {
             if (facetValue[l] !== value[l]){
@@ -116,23 +142,15 @@ function checkChildren(facets, facetValue) {
 }
 
 function createParent(facets, facetID) {
-    var facetValue = cutter(facets[facetID].value);
+    var facetValue = cutter(facets[facetID].value).slice(0, -1);
     var cislo = parseInt(facetValue[0])-1;
     facetValue.splice(0,1,cislo.toString());
     facetValue = facetValue.slice(0,-1);
-    facetValue = createClass(facetValue);
+    facetValue = createId(facetValue);
     return facetValue;
 }
 
-function existClass(className) {
-    if (document.getElementById(className)){
-        return true;
-    } else {
-        return false;
-    }
-}
-
-function createClass(facetValue) {
+function createId(facetValue) {
     var facetClass = facetValue;
     facetClass.slice(0,-1);
     facetClass = facetClass.join('-');
@@ -141,7 +159,6 @@ function createClass(facetValue) {
 
 function cutter(facetValue) {
     facetValue = facetValue.split('/');
-    facetValue = facetValue.slice(0, -1);
     return facetValue;
 }
 
@@ -151,8 +168,12 @@ function toHTML(html, id) {
 
 
 
+var resultDef;
 
 function setFacets(results, open, subOpen) {
+    resultDef = results.default;
+    open = transAll(open);
+    subOpen = transAll(subOpen);
     $( "#side-facets-placeholder .list-group" ).children('ul').each(function() {
         $(this).addClass("hide");
         for (var i = 0; i < open.length; i++) {
@@ -167,14 +188,13 @@ function setFacets(results, open, subOpen) {
 
         //$( "li" ).clone().add( "<span>Again</span>" ).appendTo( $(this).children('li:nth-child(4)'));
         if ($(this).children('ul li').size() > parseInt(results.default)) {
-            $(this).children("li:nth-of-type("+results.default+")").after( "<p class='new'>Zobrazit všechny</p>" );
+            $(this).children("li:nth-of-type("+$(this).children('ul li').size()+")").after( "<p class='new'>Zobrazit všechny</p>" );
         }
     });
 
     $( "#side-facets-placeholder .list-group ul" ).children('ul').each(function() {
         $(this).addClass("hide");
         for (var i = 0; i < subOpen.length; i++) {
-            //console.log(open[i]);
             if (this.id.search(subOpen[i]) >= 0) {
                 $(this).removeClass("hide");
                 //$(this).children('li').removeClass("hide");
@@ -204,45 +224,128 @@ jQuery( document ).ready( function( $ ) {
         var pokus = "#"+event.target.parentNode.id;
 
         $(event.target).addClass("hide");
-        $(pokus).children('li').slice(6).addClass("hide");
-        // @TODO vyresit misto pevneho cisla 6 aby to bral z .ini
-        $(pokus).children("li:nth-of-type(6)").after( "<p class='new'>Zobrazit všechny</p>" );
+        $(pokus).children('li').slice(resultDef).addClass("hide");
+        $(pokus+' .new').removeClass('hide');
     });
 
 
-    // nefunguje dobre protoe nefunguje dobre checkChildren!!!!!
     $( 'body' ).on( 'click', '.arrow', function( event ) {
         var classArrow = event.target.id;
         classArrow = classArrow.split('-');
         classArrow = classArrow.slice(0, -1);
         classArrow.splice(1,0,'ul');
-        classArrow = createClass(classArrow);
+        classArrow = createId(classArrow);
         $('#'+classArrow).each(function() {
-            console.log(classArrow);
-            $(this).removeClass("hide");
+            $(this).toggleClass("hide");
         });
-        $(event.target).addClass("active");
-        console.log('vse ok');
+        $(event.target).toggleClass("active");
     });
 
-    $( 'body' ).on( 'click', '.arrow.active', function( event ) {
-        var classArrow = event.target.id;
-        classArrow = classArrow.split('-');
-        classArrow = classArrow.slice(0, -1);
-        classArrow.splice(1,0,'ul');
-        classArrow = createClass(classArrow);
-        $('#'+classArrow).each(function() {
-            console.log(classArrow);
-            $(this).addClass("hide");
-        });
-        $(event.target).removeClass("active");
-        console.log('vse ok');
+    $( 'body' ).on( 'click', 'li.list-group-item.or-facet span', function( event ) {
+        var parentId = event.target.closest('ul').id;
+        parentId = parentId.split('-');
+        parentId.splice(1,1);
+        parentId = parentId.join('-');
+        //console.log(parentId);
+        var childClass = event.target.parentNode.id;
+        //console.log(childClass);
+        var tridy = event.target.className;
+        tridy = tridy.split(' ');
+        if (tridy.indexOf('parent') >= 0 || tridy.indexOf('child') >= 0) { // facet with hierarchy
+            if (tridy.indexOf('active') >= 0) {
+                if (tridy.indexOf('parent') >= 0) { // odklikava childy
+                    $(event.target).removeClass('half-active');
+                    $(event.target).removeClass('active');
+                    childClass = '.' + childClass + ' span';
+                    $(childClass).each(function () {
+                        $(this).removeClass("active");
+                        $(this).removeClass("half-active");
+                    });
+                }
+                if (tridy.indexOf('child') >= 0) { // odklikava parenta
+                    // @TODO vsechny urovne
+                    $(event.target).removeClass('active');
+                    $(event.target).removeClass('half-active');
+                    // @TODO neslo by neco ve stylu event.target.parents().hasClass(or-facet) ?????
+                    while (parentId.match(/-/g).length >= 3) {
+                        console.log(parentId.match(/-/g).length);
+                        $('#' + parentId + ' span').each(function () {
+                            $(this).removeClass("active");
+                            if (!$('.' + parentId + ' span').hasClass('active')) {
+                                $(this).removeClass("half-active");
+                            }
+                        });
+                        parentId = parentId.split('-');
+                        parentId.splice(-1,1);
+                        var cislo = parseInt(parentId[2])-1;
+                        parentId.splice(2,1,cislo.toString());
+                        parentId = parentId.join('-');
+                        console.log(parentId);
+                    }
+                    /*parentId = parentId + ' span';
+                    $('#' + parentId).each(function () {
+                        $(this).removeClass("active");
+                        if (!$('.' + parentId).hasClass('active')) {
+                            $(this).removeClass("half-active");
+                        }
+                    });*/
+                }
+            } else if (tridy.indexOf('half-active') >= 0) {
+                $(event.target).addClass('active');
+                if (tridy.indexOf('parent') >= 0) { // zaklikava childy
+                    childClass = '.' + childClass + ' span';
+                    $(childClass).each(function () {
+                        $(this).addClass("active");
+                    });
+                }
+                if (tridy.indexOf('child') >= 0) { // zaklikava parenta
+                    parentId = parentId + ' span';
+                    $('#' + parentId).each(function () {
+                        $(this).addClass("half-active");
+                    });
+                }
+            } else {
+                if (tridy.indexOf('parent') >= 0) { // zaklikava childy
+                    $(event.target).addClass('half-active');
+                    $(event.target).addClass('active');
+                    childClass = '.' + childClass + ' span';
+                    $(childClass).each(function () {
+                        $(this).addClass("half-active");
+                        $(this).addClass("active");
+                    });
+                }
+                if (tridy.indexOf('child') >= 0) { // zaklikava parenta
+                    $(event.target).addClass('active');
+                    // @TODO neslo by neco ve stylu event.target.parents().hasClass(or-facet) ?????
+                    while (parentId.match(/-/g).length >= 3) {
+                        console.log(parentId.match(/-/g).length);
+                        $('#' + parentId + ' span').each(function () {
+                            $(this).addClass("half-active");
+                            if ($('.' + parentId + ' span').length === $('.' + parentId + ' span.active').length) {
+                                $(this).addClass("active");
+                            }
+                        });
+                        parentId = parentId.split('-');
+                        parentId.splice(-1,1);
+                        var cislo = parseInt(parentId[2])-1;
+                        parentId.splice(2,1,cislo.toString());
+                        parentId = parentId.join('-');
+                        console.log(parentId);
+                    }
+                }
+            }
+        } else { // alone facet
+            $(event.target).toggleClass('active');
+        }
     });
 
+    $( 'body' ).on( 'click', 'li.list-group-item.and-facet span', function( event ) {
+        $(event.target).toggleClass('active');
+    });
 
-	/*
-	 * Save chosen institutions to DB
-	 */
+        /*
+         * Save chosen institutions to DB
+         */
 	$( 'body' ).on( 'click', '#save-these-institutions', function( event ) {
 		event.preventDefault();
 

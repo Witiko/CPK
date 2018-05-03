@@ -96,7 +96,6 @@ $results = $this->recommend->getResults();
     foreach ($sideFacetSet as $title => $cluster) {
       if (in_array($cluster['label'],($this->layout()->headerType != "newlibraries")? $allFieldsSection : $librariesSection)) {
   ?>
-        <div class="col-xs-12 list-group" id="side-panel-<?= str_replace(' ','-',$cluster['label']); ?>">
 
 
           <script>
@@ -121,7 +120,6 @@ $results = $this->recommend->getResults();
            */
           ?>
 
-          </div>
     <?}
     }
   }
