@@ -34,7 +34,7 @@
             &:before {
                 font-family: pr-icons;
                 content: "\ebd4";
-                color: green;
+                color: @brand-primary;
                 font-size: 14px;
             }
         }
@@ -56,7 +56,7 @@
             &:before {
                 font-family: pr-icons;
                 content: "\ebd4";
-                color: green;
+                color: @brand-primary;
                 font-size: 14px;
             }
         }
@@ -66,8 +66,25 @@
                 margin-left: -20px;
                 font-family: pr-icons;
                 content: "\ead8";
-                color: pink;
+                color: @brand-primary;
+                font-weight: bold;
                 font-size: 14px;
+            }
+            &:hover {
+                content: "\ead9";
+            }
+        }
+        .arrow.active {
+            &:before {
+                margin-left: -20px;
+                font-family: pr-icons;
+                content: "\ead9";
+                color: @brand-primary;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            &:hover {
+                content: "\ead8";
             }
         }
     }
