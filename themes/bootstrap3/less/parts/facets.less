@@ -1,13 +1,18 @@
 #side-facets-placeholder {
+    .side-facets-header {
+        font-size: 20px;
+        font-weight: bold;
+        margin: 10.5px 0;
+    }
     ul {
-        padding-left: 15px;
+        padding-left: 20px;
     }
     li {
         padding-left: 0;
     }
 
     .title {
-        &:after {
+        &::after {
             content: none;
         }
     }
@@ -16,76 +21,143 @@
         background-color: inherit;
         padding: 10px;
         margin: 5px;
-        border: 0 grey solid;
-        border-bottom-width: 2px;
-        //border-color: grey;
-        //border-style: solid;
+        margin-top: 0;
+        border: 0 @grey-color solid;
+        border-bottom-width: 1px;
+        #institution-icons {
+            display: inline;
+            float: right;
+            padding-top: 3px;
+            a {
+                padding-left: 5px;
+            }
+        }
         .list-group-item {
             background-color: inherit;
-            span {
+            font-size: 15px;
+            padding-right: 0;
+            .item {
+                color: @link-hover-color;
                 cursor: pointer;
+                width: 100%;
+                padding-right: 30px;
+                &::before {
+                    padding: 0 8px 0 3px;
+                    margin-left: -28px;
+                }
+                display: inline-block;
+                margin-left: 28px;
+            }
+            &.active {
+                background-color: inherit;
+            }
+            .badge {
+                color: grey;
+                font-weight: normal;
+                background-color: inherit;
+                padding: 0;
+                padding-top: 8px;
+                padding-left: 5px;
+                float: right;
+                display: inline;
             }
         }
-        .list-group-item.active {
-            background-color: inherit;
+        li.arrow.title {
+            &::before {
+                margin-left: 0;
+            }
+            .arrow-title {
+                display: inline;
+                color: @brand-primary;
+                font-size: 17px;
+                font-weight: normal;
+                margin-left: 25px;
+            }
         }
-        .or-facet span {
-            font-size: 14px;
-            &:before {
+        .or-facet .item {
+            &::before {
                 font-family: pr-icons;
                 content: "\ebd4";
-                color: @brand-primary;
-                font-size: 14px;
+                color: grey;
+                font-size: 15px;
+                font-weight: bold;
+            }
+            &.half-active {
+                font-weight: normal;
+                &::before {
+                    color: @brand-primary;
+                    content: "\e92c";
+                    font-weight: bold;
+                }
+            }
+            &.active {
+                font-weight: normal;
+                &::before {
+                    color: @brand-primary;
+                    content: "\eb06";
+                    font-weight: bold;
+                }
             }
         }
-        .or-facet span.half-active {
-            &:before {
-                content: "\e92c";
-            }
-        }
-        .or-facet span.active {
-            &:before {
-                content: "\eb06";
-            }
-        }
-        .and-facet span.active {
-            font-weight: bold;
-        }
-
-        .parent span {
-            &:before {
+        .and-facet .item {
+            &::before {
                 font-family: pr-icons;
-                content: "\ebd4";
+                content: "\eacc";
                 color: @brand-primary;
-                font-size: 14px;
+                font-size: 15px;
+            }
+            &.active {
+                font-weight: normal;
+                &::before {
+                    content: "\eacd";
+                    font-weight: normal;
+                }
+                font-weight: bold;
             }
         }
 
         .arrow {
-            &:before {
+            cursor: pointer;
+            &::before {
+                position: absolute;
                 margin-left: -20px;
                 font-family: pr-icons;
                 content: "\ead8";
                 color: @brand-primary;
-                font-weight: bold;
-                font-size: 14px;
+                font-size: 15px;
             }
-            &:hover {
-                content: "\ead9";
+            &.title::before {
+                font-size: 17px;
+            }
+            &.active {
+                &::before {
+                    content: "\ead9";
+                    cursor: pointer;
+                }
             }
         }
-        .arrow.active {
-            &:before {
-                margin-left: -20px;
-                font-family: pr-icons;
-                content: "\ead9";
-                color: @brand-primary;
-                font-weight: bold;
-                font-size: 14px;
-            }
-            &:hover {
-                content: "\ead8";
-            }
+        .hide-some-facets {
+            margin-top: 15px;
+            width: 100%;
+            display: inline-block;
+            text-align: center;
+            cursor: pointer;
+        }
+        .show-all-facets {
+            margin-top: 15px;
+            width: 100%;
+            display: inline-block;
+            text-align: center;
+            cursor: pointer;
         }
     }
+}
+
+.geo-denied {
+    display: none;
+    text-align: center;
+    color: @brand-danger;
+    border: 1px solid @brand-danger;
+    padding: 10px;
+    font-size: 20px;
 }

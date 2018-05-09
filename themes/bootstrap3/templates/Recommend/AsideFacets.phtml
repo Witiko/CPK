@@ -97,22 +97,35 @@ $results = $this->recommend->getResults();
       if (in_array($cluster['label'],($this->layout()->headerType != "newlibraries")? $allFieldsSection : $librariesSection)) {
   ?>
 
+        <?
+        if (($cluster['label'] == 'adv_search_year')) {
+         // @TODO prepsat casovou osu do JS??? nebo si to rozhodit a cast facet genervat v PHP a jinou v JS???
+         include_once 'SideFacets/PublishDate.phtml';
+         continue;
+       }
+        ?>
 
           <script>
             generateFacets(<? echo json_encode($cluster['list'])?>, <? echo json_encode(str_replace(' ','-',$cluster['label']))?>, <? echo json_encode($numberFacets)?>)
           </script>
 
+        <? if ($cluster['label'] == 'Institution'): ?>
+          <div id="institution-icons">
+            <? if ($this->auth()->isLoggedIn()): ?>
+            <a href='#' title='<?=$this->translate('Load preferred institutions')?>' data-toggle="tooltip" id='load-saved-institutions'>
+              <i class='pr-web-uploadarrow'> </i>
+            </a>
 
-
-          <?
-          // @TODO prozatim schovano aby mi to nedelalo bordel jelikoz to je uplne jiny typ vytvareni facet
-           /*if (($cluster['label'] == 'adv_search_year') && (in_array($cluster['label'], $openFacets))) {
-            // @TODO prepsat casovou osu do JS??? nebo si to rozhodit a cast facet genervat v PHP a jinou v JS???
-            include_once 'SideFacets/PublishDate.phtml';
-            echo '</div>';
-            continue;
-          }*/
-          ?>
+            <a href='#' title='<?=$this->translate('Load my institutions')?>' data-toggle="tooltip" id='load-my-institutions'>
+              <i class='pr-interface-househome2'> </i>
+            </a>
+          <? else: ?>
+            <a href='#' title='<?=$this->translate('Load nearest institutions')?>' data-toggle="tooltip" id='load-nearest-institutions'>
+              <i class='pr-location-pinmap5'> </i>
+            </a>
+          <? endif; ?>
+          </div>
+        <? endif; ?>
 
           <?
           /**
