@@ -26,6 +26,7 @@
  * @link     http://vufind.org/wiki/vufind2:record_drivers Wiki
  */
 namespace VuFind\RecordDriver;
+use DOMDocument;
 
 /**
  * Model for EDS records.
@@ -46,6 +47,20 @@ class EDS extends SolrDefault
      * @var array
      */
     protected $pdfTypes = ['ebook-pdf', 'pdflink'];
+
+    /**
+     * Allowed tags comes from EBSCO in book description
+     *
+     * @var array
+     */
+    private $allowedEbscoTags = ["p", "br", "em", "i", "span"];
+
+    /**
+     * Allowed attributes comes from EBSCO in book description
+     *
+     * @var array
+     */
+    private $allowedEbscoAttrs = [];
 
     /**
      * Return the unique identifier of this record within the Solr index;
@@ -431,6 +446,43 @@ class EDS extends SolrDefault
     }
 
     /**
+     * Remove DOM element from string with tag content
+     *
+     * @param $str
+     * @return mixed
+     * @internal param $text
+     * @internal param string $tags
+     * @internal param bool $invert
+     */
+    function stripTagsAndAttrs($str)
+    {
+        if (!strlen($str)) {
+            return false;
+        }
+
+        $xml = new DOMDocument();
+
+        //Suppress warnings: proper error handling is beyond scope of example
+        libxml_use_internal_errors(true);
+
+        if ($xml->loadHTML($str, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD)) {
+            foreach ($xml->getElementsByTagName("*") as $tag) {
+                if (!in_array($tag->tagName, $this->allowedEbscoTags)) {
+                    $tag->parentNode->removeChild($tag);
+                } else {
+                    foreach ($tag->attributes as $attr) {
+                        if (!in_array($attr->nodeName, $this->allowedEbscoAttrs)) {
+                            $tag->removeAttribute($attr->nodeName);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $xml->saveHTML();
+    }
+
+    /**
      * Parse a SimpleXml element and
      * return it's inner XML as an HTML string
      *
@@ -489,6 +541,9 @@ class EDS extends SolrDefault
 
         //  The XML data is escaped, let's unescape html entities (e.g. &lt; => <)
         $data = html_entity_decode($data, ENT_QUOTES, "utf-8");
+
+        //remove iframes
+        $data = $this->stripTagsAndAttrs($data);
 
         // Start parsing the xml data
         if (!empty($data)) {
