@@ -9,7 +9,7 @@
 
 
 <?
-$min = !empty($rangeFacets[$title]['values'][0]) ? min($rangeFacets[$title]['values'][0], 1400) : 1400;
+$min = !empty($rangeFacets[$title]['values'][0]) ? min($rangeFacets[$title]['values'][0], 1000) : 1000;
 $future = date('Y', time()+31536000);
 $max = !empty($rangeFacets[$title]['values'][1]) ? max($future, $rangeFacets[$title]['values'][1]) : $future;
 $low  = !empty($rangeFacets[$title]['values'][0]) ? $rangeFacets[$title]['values'][0] : $min;
