@@ -233,7 +233,7 @@ function setFacets(results, open, subOpen) {
                 $(this).children('ul').addClass("hide");
             }
         }
-        $(this).children('li').slice(parseInt(results.default)).addClass("hide");
+        $(this).children('li').slice(parseInt(results.default)).addClass("hide");// schova zbyle li ktere nechceme defaultne zobrazovat
 
         if ($(this).children('ul li').size() > parseInt(results.default)) {
             // @TODO translate dodelat
@@ -309,7 +309,6 @@ jQuery( document ).ready( function( $ ) {
         return false;
     });
 
-    // @TODO vsude kde se vyskytuje event.target tak nahradit ID, pote mohu na zacatku ridat pri liknuti na vnoreny element aby pracoval s nadrazenym elementem
     $( 'body' ).on( 'click', 'li.list-group-item.or-facet .item', function( event ) {
         var parentId = event.target.closest('ul').id;
         parentId = delPartId(parentId, 1, 1);
@@ -398,9 +397,26 @@ jQuery( document ).ready( function( $ ) {
 
 
     $( 'body' ).on( 'click', 'li.list-group-item .item', function() {
-        $('li.list-group-item .item.active').each(function () {
-            console.log(this.closest('li').id);
+        $('li.list-group-item .item.active:not(.parent)').each(function (event) {
+            // @TODO zde ze vsech co najde ze jsou zakliknuty udela ten compilvany retezec pro vyhledavani a pote zavola vyhledavani
+
+            //console.log(this.closest('li').id);
         });
+        var encodeFilters =  specialUrlEncode(LZString.compressToBase64(filtersAsString));
+
+
+        ADVSEARCH.updateSearchResults(
+            undefined,
+            {
+                queryString: '?lookfor0=' + encodeURIComponent($( "#searchForm_lookfor" ).val()) + '&type0='
+                + type + '&searchTypeTemplate=basic&database=' + database
+                + '&page=1&bool0=AND&join=AND&limit=' + limit +'&sort=' + sort
+                + '&keepEnabledFilters=' + enabledKeepFacets + "" + filters + ""
+            },
+            false
+        );
+
+
         console.log('===============');
     });
 
