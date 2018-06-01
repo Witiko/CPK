@@ -60,7 +60,7 @@ $this->feedback()->hideFeedbackModalButton = true;
           <? if ($this->userEmail || $this->email): ?>
             <input id="feedback_email" type='email' name='email'
                    class='form-control'
-                   value='<?= ($this->email) ? htmlspecialchars($this->email) : $this->userEmail ?: '' ?>'
+                   value='<?= ($this->email) ? htmlspecialchars($this->email) : htmlspecialchars($this->userEmail) ?: '' ?>'
                    required>
           <? else: ?>
             <input id="feedback_email" type='email' name='email' class='form-control' required>
