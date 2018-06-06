@@ -839,7 +839,7 @@ class XCNCIP2 extends \VuFind\ILS\Driver\AbstractBase implements
                 return $this->handleStutuses($response);
             }
 
-            if ($this->agency === 'ZLG001') {
+            if ($this->agency === 'ZLG001' || $this->agency === 'ABA012') {
                 $bibId = str_replace('oai:', '', $bibId);
                 $request = $this->requests->LUISBibItem($bibId, $nextItemToken, $this, $patron);
                 $response = $this->sendRequest($request);
@@ -1396,7 +1396,7 @@ class XCNCIP2 extends \VuFind\ILS\Driver\AbstractBase implements
             if (! $excluded) $leastOne = true;
             $sum += $amount_int;
 
-            if ($this->agency == 'ZLG001') $desc = $action;
+            if ($this->agency == 'ZLG001' || $this->agency === 'ABA012') $desc = $action;
             if (empty($desc)) $desc = $type;
 
             $fines[] = array(
@@ -1455,7 +1455,7 @@ class XCNCIP2 extends \VuFind\ILS\Driver\AbstractBase implements
             if (empty($id)) $id = $this->useXPath($current,
                     'Ext/BibliographicDescription/BibliographicItemId/BibliographicItemIdentifier');
             if (empty($title)) $title = $extTitle;
-            if ($this->agency === 'ZLG001') {
+            if ($this->agency === 'ZLG001' || $this->agency === 'ABA012') {
                 // $type == 'Hold' => rezervace; $type == 'Loan' => objednavka
             }
 
