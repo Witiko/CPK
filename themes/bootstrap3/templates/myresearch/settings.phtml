@@ -55,7 +55,7 @@
         <fieldset>
           <legend><?=$this->translate('Preferred institutions') ?></legend>
           <div class="row">
-            <form action="/MyResearch/userSaveInstitution">
+            <form action="/MyResearch/userUpdateSavedInstitution?action=saveSavedInstitution">
               <span>
                 <select id="institutions" name="institution">
                   <?php foreach($institutions as $institution): ?>
@@ -80,7 +80,7 @@
                         <?=$this->translate($institution)?>
                       </td>
                       <td>
-                        <a href='/MyResearch/userRemoveSavedInstitution?institution=<?=$institution?>'
+                        <a href='/MyResearch/userUpdateSavedInstitution?action=removeSavedInstitution&institution=<?=$institution?>'
                            title='Remove'
                            class='pr-interface-crosscancel3 pull-right settings-preferred-institution'>
                         </a>

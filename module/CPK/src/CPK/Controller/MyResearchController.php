@@ -1285,11 +1285,11 @@ class MyResearchController extends MyResearchControllerBase
     }
 
     /**
-     * Deletes user's saved institution
+     * Updates user's saved institution
      *
      * @return mixed|\Zend\Http\Response|\Zend\Http\Response
      */
-    public function userRemoveSavedInstitutionAction()
+    public function userUpdateSavedInstitutionAction()
     {
         // Stop now if the user does not have valid catalog credentials available:
         if (! $user = $this->getAuthManager()->isLoggedIn()) {
@@ -1300,29 +1300,11 @@ class MyResearchController extends MyResearchControllerBase
         $institution = $this->params()->fromPost('institution', $this->params()->fromQuery('institution'));
 
         if ($institution) {
-            $this->getTable("usersettings")->removeSavedInstitution($user, $institution);
-        }
-
-        return $this->redirect()->toRoute('myresearch-settings');
-    }
-
-    /**
-     * Save user institution
-     *
-     * @return mixed|\Zend\Http\Response|\Zend\Http\Response
-     */
-    public function userSaveInstitutionAction()
-    {
-        // Stop now if the user does not have valid catalog credentials available:
-        if (! $user = $this->getAuthManager()->isLoggedIn()) {
-            $this->flashExceptions($this->flashMessenger());
-            return $this->forceLogin();
-        }
-
-        $institution = $this->params()->fromPost('institution', $this->params()->fromQuery('institution'));
-
-        if ($institution) {
-            $this->getTable("usersettings")->saveInstitution($user, $institution);
+            if ($this->params()->fromPost('action') == 'removeSavedInstitution') {
+                $this->getTable("usersettings")->removeSavedInstitution($user, $institution);
+            } else {
+                $this->getTable("usersettings")->saveInstitution($user, $institution);
+            }
         }
 
         return $this->redirect()->toRoute('myresearch-settings');
