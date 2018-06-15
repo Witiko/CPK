@@ -11,7 +11,7 @@
     $this->headScript()->appendFile("//cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js");
 
 ?>
-<!--<ul class="breadcrumb hidden-print"><?=$this->layout()->breadcrumbs ?></ul>-->
+
 <div class="row">
   <div class="<?=$this->layoutClass('mainbody')?>">
     <h2><?=$this->transEsc('Settings') ?></h2>
@@ -21,7 +21,9 @@
           <legend><?=$this->translate('Citations style') ?></legend>
           <select name='citation-style' id="citation-style" class="form-control">
             <? foreach ($this->availableCitationStyles as $style): ?>
-              <option<?= ($this->selectedCitationStyle === $style['id']) ? ' selected="selected"' : '' ?> value='<?=$style['id']?>'><?=$style['description']?></option>
+              <option<?= ($this->selectedCitationStyle === $style['id']) ? ' selected="selected"' : '' ?> value='<?=$style['id']?>'>
+                  <?=$style['description']?>
+              </option>
             <? endforeach; ?>
           </select>
           <span class='citation-style-status'></span>
@@ -30,7 +32,9 @@
           <legend><?=$this->translate('Records per page') ?></legend>
           <select name='records-per-page' id="records-per-page" class="form-control">
             <? foreach ($this->recordsPerPageOptions as $option): ?>
-              <option<?= ($this->selectedRecordsPerPageOption == $option) ? ' selected="selected"' : '' ?> value='<?=$option?>'><?=$option?></option>
+              <option<?= ($this->selectedRecordsPerPageOption == $option) ? ' selected="selected"' : '' ?> value='<?=$option?>'>
+                  <?=$option?>
+              </option>
             <? endforeach; ?>
           </select>
           <span class='records-per-page-status'></span>
@@ -39,7 +43,9 @@
           <legend><?=$this->translate('Default sorting') ?></legend>
           <select name='preferred-sorting' id="preferred-sorting" class="form-control">
             <? foreach ($this->sortingOptions as $key => $option): ?>
-              <option<?= ($this->selectedSorting == $key) ? ' selected="selected"' : '' ?> value='<?=$key?>'><?=$this->transEsc($option)?></option>
+              <option<?= ($this->selectedSorting == $key) ? ' selected="selected"' : '' ?> value='<?=$key?>'>
+                  <?=$this->transEsc($option)?>
+              </option>
             <? endforeach; ?>
           </select>
           <span class='preferred-sorting-status'></span>
@@ -53,11 +59,15 @@
               <span>
                 <select id="institutions" name="institution">
                   <?php foreach($institutions as $institution): ?>
-                    <?= sprintf("<option value='%s'>%s</option>", $institution['value'], $this->translate($institution['value'])); ?>
+                    <option value='<?=$institution['value']?>'>
+                      <?=$this->translate($institution['value'])?>
+                    </option>
                   <?php endforeach; ?>
                 </select>
               </span>
-              <button class="btn btn-primary pull-right btn-sm" id="set-preferred-institutions"><?=$this->translate("Add")?></button>
+              <button class="btn btn-primary pull-right btn-sm" id="set-preferred-institutions">
+                  <?=$this->translate("Add")?>
+              </button>
             </form>
           </div>
           <div class="row">
@@ -65,7 +75,17 @@
               <tbody>
                 <?php if (! empty($preferredInstitutions)): ?>
                   <?php foreach($preferredInstitutions as $institution): ?>
-                    <?= sprintf("<tr><td>%s</td><td><a href='/MyResearch/userRemoveSavedInstitution?institution=%s' title='Remove' class='pr-interface-crosscancel3 pull-right' style='padding-top: 3px; padding-right: 6px; color: red; cursor: pointer;'></a></td></tr>", $this->translate($institution), $institution); ?>
+                    <tr>
+                      <td>
+                        <?=$this->translate($institution)?>
+                      </td>
+                      <td>
+                        <a href='/MyResearch/userRemoveSavedInstitution?institution=<?=$institution?>'
+                           title='Remove'
+                           class='pr-interface-crosscancel3 pull-right settings-preferred-institution'>
+                        </a>
+                      </td>
+                    </tr>
                   <?php endforeach; ?>
                 <?php endif; ?>
               </tbody>
