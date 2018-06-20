@@ -143,10 +143,6 @@ class PortalController extends AbstractBase
             //Error log for debuging if something wrong with captcha
             $vars['captchaErrorLog'] = $this->getCaptchaErrorLog($recaptcha->{'error-codes'}[0]);
 
-            if ($recaptcha->{'error-codes'}[0] == 'timeout-or-duplicate') {
-                $this->redirect()->toRoute('home');
-            }
-
             //Return filled fields to user for set into inputs
             $vars['email'] = $post['email'];
             $vars['text'] = $post['text'];
