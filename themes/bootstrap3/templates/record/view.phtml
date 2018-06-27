@@ -62,17 +62,9 @@
     });
 </script>
 
-<a id="back-to-search-link-ID" class='back-to-search-link' href="" title='<?=$this->translate('Back to search results')?>'>
+<a id="back-to-search-link-ID" href="" title='<?=$this->translate('Back to search results')?>'>
     <i class="pr-interface-arrowleft"> </i> <?=$this->translate('Back to search results')?>
 </a>
-<script>
-    if (document.referrer.search("/Search/") !== -1){
-        document.getElementById("back-to-search-link-ID").classList.remove("hide");
-        document.getElementById("back-to-search-link-ID").setAttribute("href",document.referrer);
-    } else {
-        document.getElementById("back-to-search-link-ID").classList.add("hide");
-    }
-</script>
 
 <? if (isset($this->scrollData) && ($this->scrollData['previousRecord'] || $this->scrollData['nextRecord'])): ?>
   <ul class="pager hidden-print">
@@ -309,6 +301,8 @@
 
             <script src="/themes/bootstrap3/js/ajax-record-tabs.js"></script>
             <script>
+            // create link for back to search result if available
+            createRefererLink();
 
             /**
              * Removes active state from Buy Link when there are no buyLinks

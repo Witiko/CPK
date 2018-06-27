@@ -596,3 +596,28 @@ var smoothScrollToElement = function( elementId ) {
         scrollTop: $( elementId ).offset().top
     }, 1000);
 };
+
+function createRefererLink() {
+    var url = window.location.href;
+    var visible = false;
+    if (url.search("referer=") !== -1) {
+        var re = /^(.*referer=)(.*)(#.*)/;
+        var encode = '';
+        if (url.match(re)) {
+            encode = url.replace(re, "$2");
+        } else {
+            encode = url.replace(/^(.*referer=)(.*)($)/, "$2");
+        }
+
+        var decode = atob(specialUrlDecode(encode));
+        if (decode.search("/Search/") !== -1) {
+            document.getElementById("back-to-search-link-ID").setAttribute("href", decode);
+            visible = true;
+        }
+    }
+    if (visible) {
+        document.getElementById("back-to-search-link-ID").classList.remove("hide");
+    } else {
+        document.getElementById("back-to-search-link-ID").classList.add("hide");
+    }
+}
