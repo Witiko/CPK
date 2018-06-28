@@ -394,14 +394,25 @@ jQuery( document ).ready( function( $ ) {
         $('#'+event.target.closest('li').id + ' .item').toggleClass('active');
     });
 
+    $( 'body' ).on( 'click', 'li.list-group-item', function( event ) {
+
+        $('li.list-group-item .active').
+        console.log(event.target.closest('li').id);
+        if ($('#'+event.target.closest('li').id + ' .item').hasClass("active")) {
+            console.log('je activni');
+        } else {
+            console.log('neni activni');
+        }
+    });
 
 
-    $( 'body' ).on( 'click', 'li.list-group-item .item', function() {
-        $('li.list-group-item .item.active:not(.parent)').each(function (event) {
-            // @TODO zde ze vsech co najde ze jsou zakliknuty udela ten compilvany retezec pro vyhledavani a pote zavola vyhledavani
-
-            //console.log(this.closest('li').id);
-        });
+    /*$( 'body' ).on( 'click', 'li.list-group-item', function(event) {
+        console.log($('#'+event.target.closest('li').id));
+        if ($('#'+event.target.closest('span')).hasClass('active')) {
+            console.log(event.target);
+        } else {
+            console.log(odkliknuti);
+        }
         var encodeFilters =  specialUrlEncode(LZString.compressToBase64(filtersAsString));
 
 
@@ -418,7 +429,7 @@ jQuery( document ).ready( function( $ ) {
 
 
         console.log('===============');
-    });
+    });*/
 
         /*
          * Save chosen institutions to DB
