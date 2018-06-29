@@ -2,6 +2,9 @@
 host           = ALEPH_SERVER
 dlfport        = ALEPH_PORT
 
+; When specified, this overrides the host, and dlfport settings for DLF requests
+dlfbaseurl     = ALEPH_BASE_URL
+
 ; Print extra messages
 debug          = true
 

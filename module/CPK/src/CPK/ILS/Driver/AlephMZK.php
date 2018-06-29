@@ -475,6 +475,12 @@ class AlephWebServices {
     protected $dlfport;
 
     /**
+     * The base URL, where the REST DLF API is running
+     *
+     */
+    protected $dlfbaseurl = null;
+
+    /**
      * Is XServer API enabled?
      *
      */
@@ -537,6 +543,9 @@ class AlephWebServices {
             $this->language = AlephWebServices::$languages[$tags[0]];
         }
         $this->dlfport = $config['dlfport'];
+        if (isset($config['dlfbaseurl'])) {
+            $this->dlfbaseurl = $config['dlfbaseurl'];
+        }
     }
 
     /**
@@ -652,7 +661,11 @@ class AlephWebServices {
             $path .= $path_element . "/";
         }
 
-        $url = "$this->host:$this->dlfport/rest-dlf/" . $path;
+        if ($this->dlfbaseurl === null) {
+            $url = "$this->host:$this->dlfport/rest-dlf/" . $path;
+        } else {
+            $url = $this->dlfbaseurl . $path;
+        }
         //if url has https protocol, don`t add http before url
         if(strpos($url, 'https://') === false) {
             $url = 'http://'.$url;
